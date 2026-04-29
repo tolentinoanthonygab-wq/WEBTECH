@@ -1,0 +1,103 @@
+table: super_admins
+    id (UUID, PK)
+    username
+    email
+    password_hash
+    status
+    created_on
+table: owners
+    id (UUID, PK)
+    prefix
+    first_name
+    middle_name
+    last_name
+    suffix
+    contact_number
+    address
+    email
+    password_hash
+    created_on
+    created_by (FK to super_admins)
+    last_updated
+    status
+table: laundry_shops
+    id (UUID, PK)
+    owner_id (FK to owners)
+    shop_name
+    address
+    contact_number
+    email
+    tin_number
+    operating_hours
+    gcash_name (For payment display)
+    gcash_number (For payment display)
+    features (JSONB)
+    created_on
+    created_by (FK to super_admins)
+    last_updated
+    status
+table: staff
+    id (UUID, PK)
+    shop_id (FK to laundry_shops)
+    first_name
+    middle_name
+    last_name
+    role (e.g., admin, washer, delivery)
+    contact_number
+    email
+    password_hash
+    created_on
+    created_by (FK to owners)
+    last_updated
+    status
+table: customers
+    id (UUID, PK)
+    shop_id (FK to laundry_shops)
+    first_name
+    middle_name
+    last_name
+    contact_number
+    address
+    email
+    password_hash
+    last_updated
+    status (Pending, Approved, Disapproved, Inactive)
+table: services
+    id (UUID, PK)
+    shop_id (FK to laundry_shops)
+    service_name
+    unit (e.g., per_kg, per_piece)
+    price_per_unit
+    category
+    created_on
+    last_updated
+    status
+table: orders
+    id (UUID, PK)
+    order_ref (Unique System Ref)
+    customer_id (FK)
+    shop_id (FK)
+    staff_id (FK - who processed it)
+    total_weight
+    total_amount
+    discount_amount
+    payment_status (Unpaid, Paid)
+    order_status (Ongoing, Done, Cancelled)
+    pickup_delivery_type
+    created_on
+    last_updated
+table: order_items
+    id (UUID, PK)   
+    order_id (FK)
+    service_id (FK)
+    quantity_or_weight
+    subtotal
+    table: payments
+    id (UUID, PK)
+    order_id (FK)
+    amount_paid
+    payment_method (Manual, GCash)
+    transaction_reference (GCash Ref No or Manual OR)
+    verified_by (FK to staff)
+    payment_date
+    status (Verified, Pending)

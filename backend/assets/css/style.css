@@ -1,0 +1,67 @@
+:root {
+    --primary-blue: #007bff;
+    --light-blue: #e7f1ff;
+    --fresh-blue: #0ea5e9;
+    --soap-white: #f8fafc;
+    --dark-blue: #1e293b;
+}
+
+body {
+    background-color: var(--soap-white);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--dark-blue);
+}
+
+.login-container {
+    max-width: 450px;
+    margin: 80px auto;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: white;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 20px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--fresh-blue);
+}
+
+.btn-primary {
+    background-color: var(--fresh-blue);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0284c7;
+}
+
+.sidebar {
+    height: 100vh;
+    background-color: var(--dark-blue);
+    color: white;
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin: 4px 12px;
+}
+
+.sidebar .nav-link:hover, .sidebar .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.dashboard-card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}

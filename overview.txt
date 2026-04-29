@@ -1,0 +1,79 @@
+I. Project Overview
+A significant portion of small-scale laundry businesses continue to operate on manual, paper-based workflows, resulting in data inconsistencies, garment mix-ups, and an inability to track revenue effectively. In the absence of a structured digital infrastructure, employees lack real-time visibility into order statuses, and management cannot generate meaningful operational reports. Furthermore, existing independent systems often lack a centralized management layer for multi-shop operations and integrated digital payment processing. These inefficiencies signal a pressing need for a SaaS-based web solution that can centralize booking, automate order tracking, and facilitate secure financial transactions across multiple branches.
+
+Existing literature confirms that web-based laundry management systems offer measurable advantages over manual operations. An Online Laundry Management System (OLMS) built on PHP, PostgreSQL, and JavaScript successfully resolved retrieval delays by assigning each customer a unique identification number (Aziz et al., 2021). Similarly, Jed et al. (2024) demonstrated that web-based ordering systems provide intuitive backend tools for order management. Commercial platforms such as Turns further confirm that status tracking and digital payment processing are now standard in modern laundry software (Techjockey, 2025).
+
+Despite this progress, notable gaps persist. Most academic systems omit the SaaS (Software as a Service) multi-tenant model, where a Super Admin manages multiple shop owners. Furthermore, existing solutions rarely implement a conditional registration flow where customers must be approved by a specific shop to secure the facility’s operations. Jed et al. (2024) acknowledged that their system did not address multi-role management beyond simple staff-owner interactions, reinforcing the need for a hierarchical system that includes Super Administration and integrated digital payment gateways like Mongo Pay and GCash.
+
+To address these gaps, this project proposes LaundPrsL, a SaaS-based Laundry Management System using HTML5, CSS, JavaScript, PHP, and PostgreSQL. The system implements four distinct user roles—Super Admin, Owner, Staff, and Customer—each with purpose-built interfaces. Unique to this system is a mandatory shop-selection registration phase and a specialized weight-calculation module for staff. By utilizing PostgreSQL’s robust relational features and integrating digital payments, LaundPrsL directly addresses the scalability and security gaps identified in prior literature.
+
+II. Requirements and Features
+Functional Requirements
+A. Super Administrative Module
+
+Shop Management: Create and configure new laundry shop profiles and assign the primary Owner account.
+
+System Control: Capability to activate or deactivate accounts across all levels: Shop Owners, Staff, Customers, and other Super Admins.
+
+Entity Oversight: Global authority to manage and toggle the status of services, orders, payments, and overdue tracking modules across the entire SaaS platform.
+
+B. Owner Module
+
+Staff Oversight: Create, modify, and manage staff accounts specific to their laundry shop.
+
+Business Analytics: Dashboard visibility of total customer count, monthly income, and yearly income summaries.
+
+Shop Configuration: Modify laundry shop details (name, address, contact) and manage the list of services and pricing.
+
+C. Staff Module
+
+Customer Verification: Receive and process customer applications to the shop; approve or disapprove requests to ensure a secure customer base.
+
+Order Management: Manually update order statuses through a defined workflow (Ongoing, Done, Cancelled).
+
+Calculator & Receipting: Use an integrated calculator to input weight and pricing manually; generate and issue digital receipts to customers.
+
+Payment Processing: Record and verify payments via GCash (Mongo Pay) or manual cash transactions, including a "Paid/Unpaid" status toggle.
+
+Daily Dashboard: Monitor daily customer requests and daily income; features an automatic reset for "Done" requests to maintain a clean daily workspace.
+
+D. Customer Module
+
+Shop-Centric Registration: Register an account by selecting a specific laundry shop; account remains "Pending" until the chosen shop’s staff approves the application.
+
+Order Lifecycle: Request orders and receive real-time notifications (e.g., "You can now bring your clothes to the shop") once an order is accepted.
+
+Payment & History: Select payment methods (GCash or Manual), view digital receipts, and access a comprehensive history of past laundry transactions.
+
+Profile Management: Edit personal details (Name, Middle Name, Last Name) and manage password security updates.
+
+E. Payment and Receipt Module
+
+Hybrid Payment Gateway: Support for digital processing through Mongo Pay (GCash) and traditional manual payment tracking.
+
+Dynamic Receipting: Automatic generation of receipts upon staff confirmation of weight and pricing, delivered directly to the customer dashboard.
+
+Non-Functional Requirements
+A. Security
+
+Encryption: All passwords must be stored as bcrypt-hashed values; plaintext storage is strictly prohibited.
+
+Access Control: Role-Based Access Control (RBAC) enforced at the server level to ensure Customers, Staff, Owners, and Super Admins only access their designated modules.
+
+Data Integrity: Use of PDO with PostgreSQL drivers and prepared statements to prevent SQL injection.
+
+Schema Protection: Implementation of PostgreSQL constraints (Unique, Not Null, Foreign Keys) to ensure data validity at the database layer.
+
+B. Performance and Usability
+
+Responsiveness: All dashboard analytics and form submissions must process within two seconds.
+
+Automation: The daily staff dashboard must automatically reset completed tasks via efficient database queries to optimize performance.
+
+C. Maintainability
+
+SaaS Architecture: The database schema must use relational integrity to maintain links between the Super Admin’s global tables and shop-specific data.
+
+Modular Code: Separation of logic (PHP), presentation (HTML/CSS), and behavior (JavaScript) for easy system updates.
+
+Scalability: Leverage PostgreSQL’s indexing capabilities to ensure the system remains fast as the number of shops and customers grows.

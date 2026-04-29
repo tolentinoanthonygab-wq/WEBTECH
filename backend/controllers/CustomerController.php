@@ -83,18 +83,20 @@ class CustomerController
         return $stmt->execute([':hash' => $newHash, ':id' => $this->customerId]);
     }
 
-    public function createRequest(string $shopId, string $type): string
+    public function createRequest(string $shopId, string $type, string $paymentMethod = '', string $notes = ''): string
     {
         $orderRef = 'REQ-' . strtoupper(substr(uniqid('', true), -6));
         $stmt = $this->db->prepare(
-            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status)
-             VALUES (:ref, :cid, :sid, :type, 'Requested') RETURNING id"
+            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status, payment_method, notes)
+             VALUES (:ref, :cid, :sid, :type, 'Requested', :pm, :notes)"
         );
         $stmt->execute([
-            ':ref'  => $orderRef,
-            ':cid'  => $this->customerId,
-            ':sid'  => $shopId,
-            ':type' => $type
+            ':ref'   => $orderRef,
+            ':cid'   => $this->customerId,
+            ':sid'   => $shopId,
+            ':type'  => $type,
+            ':pm'    => $paymentMethod,
+            ':notes' => $notes
         ]);
         return $orderRef;
     }

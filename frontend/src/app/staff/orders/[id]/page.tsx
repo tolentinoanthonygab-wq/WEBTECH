@@ -7,7 +7,7 @@ import {
   Select, SelectItem, Input,
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 } from '@nextui-org/react';
-import { FiArrowLeft, FiCheckCircle, FiX, FiDollarSign, FiPrinter, FiPlus } from 'react-icons/fi';
+import { FiArrowLeft, FiCheckCircle, FiX, FiDollarSign, FiPrinter, FiPlus, FiTrash2, FiRefreshCw } from 'react-icons/fi';
 import Link from 'next/link';
 
 const statusColor: Record<string, 'danger' | 'warning' | 'success' | 'default'> = {
@@ -49,7 +49,12 @@ export default function OrderDetailPage() {
       fetchOrder(); 
       fetch('/api/staff/services.php')
         .then(r => r.json())
-        .then(res => { if (res.success) setServices(res.data); });
+        .then(res => { 
+          if (res.success) {
+            setServices(res.data);
+            if (res.data.length === 0) console.warn('No services found for: ' + res.message);
+          }
+        });
     }
   }, [user, id]);
 
@@ -62,6 +67,16 @@ export default function OrderDetailPage() {
     });
     await fetchOrder();
     setUpdating(false);
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!confirm('Are you sure you want to PERMANENTLY DELETE this order? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`/api/staff/orders.php?id=${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) router.push('/staff/orders');
+      else alert(data.message || 'Delete failed');
+    } catch { alert('Network error'); }
   };
 
   const handleAddItem = async () => {
@@ -137,6 +152,26 @@ export default function OrderDetailPage() {
           </Chip>
         </div>
       </div>
+      
+      {/* Empty Order Alert */}
+      {order.order_status !== 'Done' && order.order_status !== 'Cancelled' && (!order.items || order.items.length === 0) && (
+          <Card className="bg-primary-50 border border-primary-200 shadow-sm rounded-2xl">
+              <CardBody className="p-6 flex flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 text-primary-900">
+                      <div className="bg-primary-100 p-3 rounded-2xl">
+                          <FiPlus className="text-xl text-primary" />
+                      </div>
+                      <div>
+                          <p className="font-black text-lg">No items added yet!</p>
+                          <p className="text-sm opacity-70">Add the laundry weight and services below to calculate the total price.</p>
+                      </div>
+                  </div>
+                  <Button color="primary" className="font-black h-12 px-8 shadow-lg shadow-primary/20" startContent={<FiPlus />} onPress={onCalcOpen}>
+                      Add Items Now
+                  </Button>
+              </CardBody>
+          </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left — Items */}
@@ -165,6 +200,16 @@ export default function OrderDetailPage() {
                 <p className="text-default-400 font-bold uppercase text-xs">Type</p>
                 <p className="font-bold">{order.pickup_delivery_type || 'Pickup'}</p>
               </div>
+              <div>
+                <p className="text-default-400 font-bold uppercase text-xs">Intended Payment</p>
+                <p className="font-bold">{order.payment_method || '—'}</p>
+              </div>
+              {order.notes && (
+                <div className="col-span-2 bg-warning-50 p-3 rounded-xl border border-warning-200">
+                    <p className="text-warning-600 font-black uppercase text-[10px] tracking-widest mb-1">Customer Notes / Estimation</p>
+                    <p className="font-bold text-warning-900">{order.notes}</p>
+                </div>
+              )}
             </CardBody>
           </Card>
 
@@ -228,10 +273,22 @@ export default function OrderDetailPage() {
             <Divider />
             <CardBody className="p-6 space-y-3">
               {order.order_status === 'Requested' && (
-                <Button color="primary" fullWidth className="font-bold" startContent={<FiCheckCircle />}
-                  isLoading={updating} onPress={() => updateStatus('Ongoing')}>
-                  Accept Request
-                </Button>
+                <div className="space-y-3">
+                    {order.items?.length > 0 ? (
+                        <Button color="primary" fullWidth className="font-bold h-12 text-lg shadow-lg shadow-primary/20" startContent={<FiCheckCircle />}
+                            isLoading={updating} onPress={() => updateStatus('Ongoing')}>
+                            Confirm & Accept Request
+                        </Button>
+                    ) : (
+                        <div className="bg-default-50 border-2 border-dashed border-default-200 rounded-2xl p-4 text-center">
+                            <p className="text-xs font-bold text-default-400 uppercase tracking-widest mb-2">Required Step</p>
+                            <p className="text-sm font-medium text-default-500 mb-3">Please weigh and add laundry items before accepting.</p>
+                            <Button color="primary" variant="flat" fullWidth className="font-bold" startContent={<FiPlus />} onPress={onCalcOpen}>
+                                Add Items Now
+                            </Button>
+                        </div>
+                    )}
+                </div>
               )}
               {order.order_status === 'Ongoing' && (
                 <Button color="success" fullWidth className="font-bold text-white" startContent={<FiCheckCircle />}
@@ -243,6 +300,12 @@ export default function OrderDetailPage() {
                 <Button color="danger" variant="flat" fullWidth className="font-bold" startContent={<FiX />}
                   isLoading={updating} onPress={() => updateStatus('Cancelled')}>
                   Cancel Order
+                </Button>
+              )}
+              {order.order_status === 'Cancelled' && (
+                <Button color="danger" fullWidth className="font-bold" startContent={<FiTrash2 />}
+                  onPress={handleDeleteOrder}>
+                  Permanently Delete
                 </Button>
               )}
               {order.payment_status !== 'Paid' && order.order_status !== 'Cancelled' && (
@@ -291,16 +354,30 @@ export default function OrderDetailPage() {
         <ModalContent>
           <ModalHeader className="font-bold text-xl">Calculator — Add Item</ModalHeader>
           <ModalBody className="gap-4 pb-6">
-            <Select label="Select Service" variant="bordered"
-              selectedKeys={selectedService ? [selectedService] : []}
-              onSelectionChange={(k) => setSelectedService(Array.from(k)[0] as string)}>
-              {services.map(s => (
-                  <SelectItem key={s.id} textValue={s.service_name} 
-                    description={`₱${s.price_per_unit} / ${s.unit === 'per_kg' ? 'kg' : 'pc'}`}>
-                      {s.service_name}
-                  </SelectItem>
-              ))}
-            </Select>
+            <div className="flex items-end gap-2">
+                <Select label="Select Service" variant="bordered"
+                    placeholder={services.length === 0 ? "No services found" : "Choose a service"}
+                    selectedKeys={selectedService ? [selectedService] : []}
+                    onSelectionChange={(k) => setSelectedService(Array.from(k)[0] as string)}>
+                    {services.map(s => (
+                        <SelectItem key={s.id} textValue={s.service_name} 
+                            description={`₱${s.price_per_unit} / ${s.unit === 'per_kg' ? 'kg' : 'pc'}`}>
+                            {s.service_name}
+                        </SelectItem>
+                    ))}
+                </Select>
+                <Button isIconOnly variant="flat" onPress={() => {
+                     fetch('/api/staff/services.php')
+                     .then(r => r.json())
+                     .then(res => { if (res.success) setServices(res.data); });
+                }}><FiRefreshCw /></Button>
+            </div>
+            
+            {services.length === 0 && (
+                <p className="text-[10px] text-danger font-bold uppercase text-center bg-danger-50 p-2 rounded-xl border border-danger-100">
+                    Warning: No services configured for this shop!
+                </p>
+            )}
             <Input label="Quantity / Weight" type="number" variant="bordered"
               description={selectedService ? `Unit: ${services.find(s => s.id === selectedService)?.unit === 'per_kg' ? 'Kilograms' : 'Pieces'}` : ''}
               value={itemQty} onValueChange={setItemQty} />

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../config/Cors.php';
-Cors::handle(['GET', 'POST', 'PUT', 'OPTIONS']);
+Cors::handle(['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']);
 
 require_once __DIR__ . '/../../controllers/AuthController.php';
 require_once __DIR__ . '/../../controllers/StaffController.php';
@@ -11,6 +11,17 @@ session_start();
 AuthController::requireRole('staff');
 
 $staff = new StaffController($_SESSION['shop_id'], $_SESSION['user_id']);
+
+if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    $orderId = $_GET['id'] ?? '';
+    if (!$orderId) {
+        echo json_encode(['success' => false, 'message' => 'id required']);
+        exit;
+    }
+    $ok = $staff->deleteOrder($orderId);
+    echo json_encode(['success' => $ok, 'message' => $ok ? 'Order deleted' : 'Delete failed']);
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $input   = json_decode(file_get_contents('php://input'), true);

@@ -7,8 +7,9 @@ import {
   Modal, ModalContent, ModalHeader, ModalBody, ModalFooter,
   Input, Select, SelectItem, useDisclosure
 } from '@nextui-org/react';
-import { FiRefreshCw, FiCheckCircle, FiX, FiDollarSign, FiLink, FiClock, FiAlertCircle } from 'react-icons/fi';
+import { FiRefreshCw, FiCheckCircle, FiX, FiDollarSign, FiLink, FiClock, FiAlertCircle, FiTrash2 } from 'react-icons/fi';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Order {
   id: string;
@@ -30,6 +31,7 @@ const statusColor: Record<string, 'danger' | 'warning' | 'success' | 'default'> 
 };
 
 export default function OrdersListPage() {
+  const router = useRouter();
   const { user, loading: authLoading } = useRequireRole('staff');
   const [orders, setOrders]     = useState<Order[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -58,6 +60,14 @@ export default function OrdersListPage() {
       body: JSON.stringify({ id, status }),
     });
     fetchOrders();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to PERMANENTLY DELETE this order? This cannot be undone.')) return;
+    const res = await fetch(`/api/staff/orders.php?id=${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) fetchOrders();
+    else alert(data.message || 'Delete failed');
   };
 
   const openPayment = (order: Order) => {
@@ -140,9 +150,10 @@ export default function OrdersListPage() {
                 <TableCell>
                   <div className="flex justify-center gap-2 flex-wrap">
                     {o.order_status === 'Requested' && (
-                      <Tooltip content="Accept — notify customer to bring clothes">
-                        <Button size="sm" color="primary" variant="flat" startContent={<FiCheckCircle />} onPress={() => updateStatus(o.id, 'Ongoing')}>
-                          Accept
+                      <Tooltip content="Process Request — weigh and add items first">
+                        <Button size="sm" color="primary" variant="flat" startContent={<FiCheckCircle />} 
+                          onPress={() => router.push(`/staff/orders/${o.id}`)}>
+                          Process
                         </Button>
                       </Tooltip>
                     )}
@@ -173,6 +184,13 @@ export default function OrdersListPage() {
                       <Tooltip content="Cancel Order">
                         <Button isIconOnly size="sm" color="danger" variant="light" onPress={() => updateStatus(o.id, 'Cancelled')}>
                           <FiX />
+                        </Button>
+                      </Tooltip>
+                    )}
+                    {o.order_status === 'Cancelled' && (
+                      <Tooltip content="Permanently Delete">
+                        <Button isIconOnly size="sm" color="danger" variant="flat" onPress={() => handleDelete(o.id)}>
+                          <FiTrash2 />
                         </Button>
                       </Tooltip>
                     )}

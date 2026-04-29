@@ -22,10 +22,17 @@ export default function StaffDashboard() {
       fetch('/api/staff/stats.php')
         .then(res => res.json())
         .then(res => {
-          if (res.success) setData(res.data);
+          if (res.success) {
+            setData(res.data);
+          } else {
+            console.error('Stats fetch failed:', res.message);
+          }
           setLoading(false);
         })
-        .catch(() => setLoading(false));
+        .catch(err => {
+          console.error('Network error:', err);
+          setLoading(false);
+        });
     }
   }, [user]);
 

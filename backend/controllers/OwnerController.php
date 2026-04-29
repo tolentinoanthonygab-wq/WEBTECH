@@ -127,16 +127,28 @@ class OwnerController
         ]);
     }
 
-    public function updateService(string $serviceId, string $name, string $unit, float $price): bool
+    public function updateService(string $serviceId, string $name, string $unit, float $price, string $category = ''): bool
     {
         $stmt = $this->db->prepare(
-            'UPDATE services SET service_name = :name, unit = :unit, price_per_unit = :price
+            'UPDATE services SET service_name = :name, unit = :unit, price_per_unit = :price, category = :category
              WHERE id = :id AND shop_id = :shop_id'
         );
         return $stmt->execute([
-            ':name'    => $name,
-            ':unit'    => $unit,
-            ':price'   => $price,
+            ':name'     => $name,
+            ':unit'     => $unit,
+            ':price'    => $price,
+            ':category' => $category,
+            ':id'       => $serviceId,
+            ':shop_id'  => $this->shopId,
+        ]);
+    }
+
+    public function deleteService(string $serviceId): bool
+    {
+        $stmt = $this->db->prepare(
+            'DELETE FROM services WHERE id = :id AND shop_id = :shop_id'
+        );
+        return $stmt->execute([
             ':id'      => $serviceId,
             ':shop_id' => $this->shopId,
         ]);

@@ -6,7 +6,7 @@ import {
   Button, Card, CardBody, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure, Chip,
   Select, SelectItem
 } from '@nextui-org/react';
-import { FiPlus, FiRefreshCw, FiEdit2, FiToggleRight, FiToggleLeft } from 'react-icons/fi';
+import { FiPlus, FiRefreshCw, FiEdit2, FiToggleRight, FiToggleLeft, FiTrash2 } from 'react-icons/fi';
 
 interface Service {
   id: string;
@@ -22,8 +22,25 @@ export default function OwnerServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  
   const [newService, setNewService] = useState({ name: '', unit: 'per_kg', price: '', category: 'Colored' });
+  const [editingService, setEditingService] = useState<Service | null>(null);
+
+  const openAddModal = () => {
+    setEditingService(null);
+    setNewService({ name: '', unit: 'per_kg', price: '', category: 'Colored' });
+    onOpen();
+  };
+
+  const handleEdit = (service: Service) => {
+    setEditingService(service);
+    setNewService({ 
+      name: service.service_name, 
+      unit: service.unit, 
+      price: service.price_per_unit.toString(), 
+      category: service.category || 'Colored' 
+    });
+    onOpen();
+  };
 
   const fetchServices = async () => {
     setLoading(true);
@@ -42,21 +59,45 @@ export default function OwnerServicesPage() {
     if (user) fetchServices();
   }, [user]);
 
-  const handleCreate = async () => {
+  const handleSave = async () => {
     try {
+      const method = editingService ? 'PUT' : 'POST';
+      const body = editingService 
+        ? { id: editingService.id, ...newService } 
+        : newService;
+
       const res = await fetch('/api/owner/services.php', {
-        method: 'POST',
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newService),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (data.success) {
         onClose();
         fetchServices();
-        setNewService({ name: '', unit: 'per_kg', price: '' });
+        setNewService({ name: '', unit: 'per_kg', price: '', category: 'Colored' });
+        setEditingService(null);
+      } else {
+        alert(data.message || 'Error saving service');
       }
     } catch (err) {
-      alert('Error creating service');
+      alert('Error saving service');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this service?')) return;
+    try {
+      const res = await fetch('/api/owner/services.php', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (data.success) fetchServices();
+      else alert(data.message || 'Failed to delete service');
+    } catch (err) {
+      alert('Error deleting service');
     }
   };
 
@@ -87,7 +128,7 @@ export default function OwnerServicesPage() {
           <Button variant="flat" color="primary" startContent={<FiRefreshCw />} onPress={fetchServices} isLoading={loading}>
             Refresh
           </Button>
-          <Button color="primary" startContent={<FiPlus />} onPress={onOpen}>
+          <Button color="primary" startContent={<FiPlus />} onPress={openAddModal}>
             Add Service
           </Button>
         </div>
@@ -127,11 +168,29 @@ export default function OwnerServicesPage() {
                       <Button 
                         isIconOnly 
                         size="sm" 
+                        color="primary" 
+                        variant="flat" 
+                        onPress={() => handleEdit(s)}
+                      >
+                        <FiEdit2 size={16} />
+                      </Button>
+                      <Button 
+                        isIconOnly 
+                        size="sm" 
                         color={s.status === 'active' ? 'warning' : 'success'} 
                         variant="flat" 
                         onPress={() => toggleStatus(s.id, s.status)}
                       >
                         {s.status === 'active' ? <FiToggleRight size={18} /> : <FiToggleLeft size={18} />}
+                      </Button>
+                      <Button 
+                        isIconOnly 
+                        size="sm" 
+                        color="danger" 
+                        variant="flat" 
+                        onPress={() => handleDelete(s.id)}
+                      >
+                        <FiTrash2 size={16} />
                       </Button>
                     </div>
                   </TableCell>
@@ -146,7 +205,9 @@ export default function OwnerServicesPage() {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 text-2xl font-black">Add New Service</ModalHeader>
+              <ModalHeader className="flex flex-col gap-1 text-2xl font-black">
+                {editingService ? 'Edit Service' : 'Add New Service'}
+              </ModalHeader>
               <ModalBody className="gap-4">
                 <Input 
                   label="Service Name" 
@@ -194,8 +255,8 @@ export default function OwnerServicesPage() {
                 <Button color="danger" variant="flat" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button color="primary" onPress={handleCreate}>
-                  Save Service
+                <Button color="primary" onPress={handleSave}>
+                  {editingService ? 'Update Service' : 'Save Service'}
                 </Button>
               </ModalFooter>
             </>

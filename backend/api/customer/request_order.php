@@ -21,9 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $type  = $input['type']           ?? 'Pickup';
+    $pm    = $input['payment_method'] ?? 'Manual';
+    $notes = $input['notes']          ?? '';
 
     try {
-        $ref = $customer->createRequest($_SESSION['shop_id'], $type);
+        $ref = $customer->createRequest($_SESSION['shop_id'], $type, $pm, $notes);
         echo json_encode(['success' => true, 'ref' => $ref, 'message' => 'Request sent!']);
     } catch (\Exception $e) {
         echo json_encode(['success' => false, 'message' => 'Failed to send request: ' . $e->getMessage()]);

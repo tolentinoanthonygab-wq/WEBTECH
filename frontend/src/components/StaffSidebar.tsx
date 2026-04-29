@@ -25,7 +25,7 @@ export default function StaffSidebar() {
       
       <nav className="flex-1 px-4 pt-4 space-y-1">
         {menuItems.map((item) => {
-          const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
+          const isActive = pathname === item.path || (pathname.startsWith(item.path + '/') && (item.path !== '/staff/orders' || pathname !== '/staff/orders/new'));
           return (
             <Link 
               key={item.path} 

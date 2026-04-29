@@ -47,15 +47,15 @@ class StaffController
 
     public function getActiveOrders(): array
     {
-        $stmt = $this->db->prepare(
-            "SELECT o.id, o.order_ref, o.order_status, o.payment_status, o.total_amount, o.created_on,
-                    c.first_name, c.last_name, c.contact_number
-             FROM orders o
-             JOIN customers c ON c.id = o.customer_id
-             WHERE o.shop_id = :shop_id AND o.order_status IN ('Requested', 'Ongoing')
-             ORDER BY o.created_on DESC"
-        );
-        $stmt->execute([':shop_id' => $this->shopId]);
+        $sql = "SELECT o.id, o.order_ref, o.order_status, o.payment_status, o.total_amount, o.created_on,
+                       c.first_name, c.last_name, c.contact_number
+                FROM orders o
+                JOIN customers c ON c.id = o.customer_id
+                WHERE o.shop_id = :shop_id 
+                  AND (LOWER(o.order_status) = 'ongoing' OR LOWER(o.order_status) = 'requested')
+                ORDER BY o.created_on DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':shop_id' => trim($this->shopId)]);
         return $stmt->fetchAll();
     }
 
@@ -156,6 +156,18 @@ class StaffController
         return $stmt->execute([':status' => $status, ':id' => $orderId, ':shop_id' => $this->shopId]);
     }
 
+    public function deleteOrder(string $orderId): bool
+    {
+        // First delete items to avoid FK issues if cascade is not set
+        $stmt = $this->db->prepare("DELETE FROM order_items WHERE order_id = :oid");
+        $stmt->execute([':oid' => $orderId]);
+        
+        $stmt = $this->db->prepare(
+            "DELETE FROM orders WHERE id = :id AND shop_id = :shop_id"
+        );
+        return $stmt->execute([':id' => $orderId, ':shop_id' => $this->shopId]);
+    }
+
     public function getShopGcashDetails(): array
     {
         $stmt = $this->db->prepare("SELECT gcash_number, gcash_name FROM laundry_shops WHERE id = :sid");
@@ -191,7 +203,7 @@ class StaffController
 
     public function getServices(): array
     {
-        $stmt = $this->db->prepare("SELECT id, service_name, unit, price_per_unit FROM services WHERE shop_id = :sid AND status = 'active'");
+        $stmt = $this->db->prepare("SELECT id, service_name, unit, price_per_unit FROM services WHERE shop_id = :sid");
         $stmt->execute([':sid' => $this->shopId]);
         return $stmt->fetchAll();
     }
@@ -205,7 +217,12 @@ class StaffController
 
     public function getDailyTotal(): float
     {
-        $stmt = $this->db->prepare("SELECT SUM(amount_paid) FROM payments p JOIN orders o ON o.id = p.order_id WHERE o.shop_id = :sid AND p.payment_date = CURRENT_DATE");
+        $stmt = $this->db->prepare(
+            "SELECT SUM(p.amount_paid) 
+             FROM payments p 
+             JOIN orders o ON o.id = p.order_id 
+             WHERE o.shop_id = :sid AND DATE(p.payment_date) = CURRENT_DATE"
+        );
         $stmt->execute([':sid' => $this->shopId]);
         return (float)$stmt->fetchColumn();
     }

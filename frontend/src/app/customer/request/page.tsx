@@ -39,10 +39,19 @@ export default function CustomerRequestPage() {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
+      const selectedService = services.find(s => s.id === estServiceId);
+      const notes = selectedService 
+        ? `Estimate: ${estQty} ${selectedService.unit === 'per_kg' ? 'kg' : 'pcs'} of ${selectedService.service_name} (${estType})`
+        : `Estimate: ${estQty} ${estType}`;
+
       const res  = await fetch('/api/customer/request_order.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: orderType, payment_method: paymentMethod }),
+        body: JSON.stringify({ 
+          type: orderType, 
+          payment_method: paymentMethod,
+          notes: notes
+        }),
       });
       const data = await res.json();
       if (data.success) {

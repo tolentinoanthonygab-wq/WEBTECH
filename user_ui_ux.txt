@@ -1,0 +1,279 @@
+================================================================================
+  WeLaund — User UI/UX Guide
+  All Roles: Customer, Staff, Owner, Super Admin
+================================================================================
+
+--------------------------------------------------------------------------------
+1. CUSTOMER
+--------------------------------------------------------------------------------
+
+PAGES & CAPABILITIES:
+
+  /login
+  - Sign in using email and password
+  - Switch to Register form via "Create Account" button (slide animation)
+  - See suspended popup if shop is closed or account is suspended
+
+  /register (redirects to /login)
+  - Fill in: Shop selection, First Name, Last Name, Middle Name,
+    Email, Contact Number, Password, Home Address
+  - Submit registration (status starts as "Pending")
+  - Redirected to login after success
+
+  /customer/dashboard
+  - View greeting with shop name
+  - See status banners:
+      * "Your laundry has been accepted!" (Ongoing orders)
+      * "Request pending approval" (Requested orders)
+  - View Ongoing Laundry orders (order ref, amount, status)
+  - View Recent Order History (last 3 completed/cancelled)
+  - View receipt link for Done orders
+  - View Shop Info card (location, contact number)
+  - Click "Request Laundry" button to go to request page
+
+  /customer/request
+  - Submit a new laundry request to the shop
+  - Select services and quantities
+
+  /customer/orders
+  - View full order history (all orders)
+  - See order reference, date, amount, payment status, order status
+  - Click "Receipt" button for completed orders
+
+  /customer/profile
+  - View and update personal profile information
+
+  /customer/receipt/[id]
+  - View detailed receipt for a completed order
+  - See itemized services, amounts, payment method
+
+  /customer/pending
+  - Shown when account status is "Pending" (not yet approved by staff)
+  - Waiting screen until staff approves the account
+
+MOBILE BOTTOM NAV:
+  Home | Request | Orders | Profile | Logout
+
+--------------------------------------------------------------------------------
+2. STAFF
+--------------------------------------------------------------------------------
+
+PAGES & CAPABILITIES:
+
+  /login
+  - Sign in using email and password
+  - See "Shop Temporarily Closed" popup if owner is suspended
+
+  /staff/dashboard
+  - View greeting with shop name
+  - See stat cards: Daily Collection, Ongoing Orders, Pending Approvals
+  - View Recent Ongoing Orders list (order ref, customer name, status)
+  - Click "New Order" button to create a new order
+  - Click order row to go to order details
+
+  /staff/orders
+  - View all orders grouped by status:
+      * New Requests (⚡)
+      * Ongoing Orders (🔄)
+      * Completed Today (✅)
+  - Per order actions:
+      * Process — go to order detail to add items
+      * Done — mark order as completed
+      * Pay — record payment (GCash or Cash)
+      * Cancel — cancel the order
+      * Delete — permanently delete cancelled orders
+      * Receipt — view customer receipt
+  - Payment modal: select method (GCash/Cash), enter reference, confirm amount
+
+  /staff/orders/new
+  - Select approved customer from dropdown
+  - Select service type and enter weight/quantity
+  - See subtotal preview per item
+  - Add multiple services to order summary
+  - Remove items from summary
+  - See estimated total
+  - Confirm and place order
+
+  /staff/orders/[id]
+  - View order details
+  - Add/remove order items
+  - Update order status
+
+  /staff/customers
+  - View all customers grouped by status:
+      * Pending Approval ⏳
+      * Approved ✅
+      * Rejected/Inactive 🚫
+  - Per customer actions:
+      * Approve — allow customer to login and request laundry
+      * Reject — disapprove registration
+      * Deactivate — deactivate an approved customer
+
+  /staff/settings
+  - Update staff profile (name)
+  - Change password
+
+MOBILE BOTTOM NAV:
+  Home | New | Orders | Approvals | Settings | Logout
+
+--------------------------------------------------------------------------------
+3. OWNER
+--------------------------------------------------------------------------------
+
+PAGES & CAPABILITIES:
+
+  /login
+  - Sign in using email and password
+  - See suspended popup if account is suspended by developer
+
+  /owner/dashboard
+  - View greeting with shop name
+  - See 6 stat cards:
+      * Daily Income (today's total)
+      * Monthly Income (current month total)
+      * Total Staff
+      * Total Customers (with pending count)
+      * Active Services
+      * Yearly Total
+  - Income Calendar:
+      * Navigate months with ← → arrows
+      * See daily income per day (color intensity = income amount)
+      * Today highlighted with cyan border
+      * Click a day to see exact income amount
+      * Month total displayed above calendar
+  - Monthly Bar Chart (last 12 months, current month highlighted)
+  - Quick Links: Manage Staff, Manage Services, Shop Settings
+
+  /owner/staff
+  - View all staff members (name, email, status badge)
+  - Activate or Deactivate staff accounts
+  - Add New Staff via modal:
+      * Enter First Name, Last Name, Email
+      * Default password: Admin@123
+
+  /owner/services
+  - View all laundry services (name, category badge, price/unit)
+  - Add New Service via modal:
+      * Service Name, Category (White/Colored/Blanket/Other)
+      * Unit (per kg / per piece), Price
+  - Edit existing service
+  - Toggle service active/inactive
+  - Delete service
+
+  /owner/settings
+  - Update shop information:
+      * Shop Name, Address, Contact Number
+      * GCash Number, GCash Name
+
+MOBILE BOTTOM NAV:
+  Home | Staff | Services | Settings | Logout
+
+--------------------------------------------------------------------------------
+4. SUPER ADMIN
+--------------------------------------------------------------------------------
+
+PAGES & CAPABILITIES:
+
+  /login
+  - Sign in using email or username and password
+  - Full access regardless of role selection
+
+  /super-admin/dashboard
+  - View platform-wide stats:
+      * Total Revenue (all payments across all shops)
+      * Total Shops
+      * Active Owners
+      * Total Staff
+      * Total Customers
+      * Pending Approvals
+  - Quick action links: Manage Shops, Manage Owners, Manage Admins
+
+  /super-admin/shops
+  - View all laundry shops (name, owner, address, GCash info, status, date)
+  - Activate or Deactivate any shop
+  - Create New Shop + Owner in one form:
+      * Shop: Name, Address, Contact Number
+      * Owner: First Name, Last Name, Email, Password
+
+  /super-admin/owners
+  - View all shop owners (name, email, shop name, status)
+  - Suspend or Activate any owner
+  - NOTE: Suspending an owner automatically suspends all their
+    staff and customers (cascade suspension)
+
+  /super-admin/staff
+  - View all staff across every shop (name, email, shop, status)
+  - Search by name, email, or shop
+  - Activate or Deactivate any staff member
+
+  /super-admin/customers
+  - View all customers across every shop
+  - Filter by status: All, Approved, Pending, Disapproved, Inactive
+  - Search by name, email, or shop
+  - Change customer status:
+      * Approved → Inactive or Pending
+      * Pending → Approved or Disapproved
+      * Disapproved → Pending
+      * Inactive → Approved
+
+  /super-admin/admins
+  - View all super admin accounts (username, email, status, created date)
+  - Search by username or email
+  - Activate or Deactivate any admin (cannot deactivate own account)
+  - Add New Super Admin:
+      * Username, Email, Password
+
+MOBILE BOTTOM NAV:
+  Home | Shops | Owners | Admins | Logout
+
+--------------------------------------------------------------------------------
+SUSPENSION LOGIC
+--------------------------------------------------------------------------------
+
+  Owner Suspended by Super Admin:
+  → Owner cannot login (popup: "Account Suspended by developer")
+  → All staff of that shop auto-suspended
+  → All customers of that shop auto-suspended
+  → Staff login shows: "Shop Temporarily Closed" popup
+  → Customer login shows: "Shop Temporarily Closed" popup
+
+  Account Already Logged In When Suspended:
+  → Session check detects suspension on next page load
+  → User is redirected to /login
+  → Appropriate popup is shown automatically
+
+--------------------------------------------------------------------------------
+SHARED UI FEATURES (ALL ROLES)
+--------------------------------------------------------------------------------
+
+  Login Page:
+  - Sky gradient background (CSS recreation)
+  - Dark navy glassmorphism card
+  - Slide animation between Login and Register forms
+  - Underline-style inputs with animated cyan focus line
+  - Gradient button (cyan → indigo → purple)
+
+  Sidebar (Desktop):
+  - Dark navy semi-transparent background
+  - Logo with dark navy pill
+  - User badge showing role, name, shop
+  - Active nav item uses gradient highlight
+  - Logout button at bottom
+
+  Mobile Bottom Nav:
+  - Fixed to bottom of screen (mobile only)
+  - Dark navy glassmorphism with rounded top corners
+  - Active item glows with gradient
+  - Logout button always visible
+
+  All Dashboard Pages:
+  - Sky gradient background (same as login)
+  - Dark navy cards (rgba(10,20,50,0.72) + blur)
+  - White text on dark cards
+  - Gradient action buttons
+  - Mobile-first card layouts (no desktop-only tables)
+  - Responsive grid: 2 cols mobile → more on desktop
+
+================================================================================
+  END OF DOCUMENT
+================================================================================

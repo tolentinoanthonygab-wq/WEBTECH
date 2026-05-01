@@ -25,7 +25,8 @@ class AuthController
             foreach ($roles as $r) {
                 $res = $this->login($credential, $password, $r);
                 if ($res === true) return true;
-                // If it's a specific status error (like Pending), return it immediately
+                // Return immediately for specific known messages
+                if ($res === 'SHOP_SUSPENDED') return $res;
                 if (is_string($res) && strpos($res, 'Your account') !== false) return $res;
             }
             return 'Invalid email or password.';
@@ -111,15 +112,18 @@ class AuthController
     private function loginCustomer(string $email, string $password): bool|string
     {
         $stmt = $this->db->prepare(
-            'SELECT c.id, c.first_name, c.last_name, c.password_hash, c.status, c.shop_id, s.shop_name
+            'SELECT c.id, c.first_name, c.last_name, c.password_hash, c.status, c.shop_id, s.shop_name,
+                    o.status AS owner_status
              FROM customers c
              JOIN laundry_shops s ON s.id = c.shop_id
+             JOIN owners o        ON o.id = s.owner_id
              WHERE c.email = :email LIMIT 1'
         );
         $stmt->execute([':email' => $email]);
         $user = $stmt->fetch();
 
         if (!$user) return 'Account not found.';
+        if ($user['owner_status'] !== 'active') return 'SHOP_SUSPENDED';
         if ($user['status'] === 'Pending') return 'Your account is pending, please wait for approval.';
         if ($user['status'] === 'Disapproved') return 'Your registration was rejected by the shop staff.';
         if ($user['status'] === 'Inactive') return 'Your account is currently inactive.';

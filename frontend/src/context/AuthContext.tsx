@@ -45,10 +45,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('Session response:', res);
         if (res.success) {
           if (res.suspended) {
-            // Account suspended — clear session and show message on login page
             setUser(null);
             localStorage.removeItem('welaund_session');
-            router.push('/login?suspended=1');
+            // Check if suspended due to shop owner or account itself
+            const role = res.data?.role;
+            if (role === 'staff' || role === 'customer') {
+              router.push('/login?shop_suspended=1');
+            } else {
+              router.push('/login?suspended=1');
+            }
           } else {
             setUser(res.data);
             localStorage.setItem('welaund_session', JSON.stringify(res.data));

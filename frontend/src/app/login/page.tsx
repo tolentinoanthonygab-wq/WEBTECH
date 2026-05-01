@@ -23,7 +23,7 @@ const CARD_STYLE = {
   backdropFilter: 'blur(24px)',
   WebkitBackdropFilter: 'blur(24px)',
   border: '1px solid rgba(255,255,255,0.12)',
-  boxShadow: '0 24px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)',
+  boxShadow: '0 24px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(5, 0, 0, 0.08)',
 };
 
 const BTN_STYLE = {
@@ -52,12 +52,16 @@ export default function AuthPage() {
   const [view, setView]           = useState<'login' | 'register'>('login');
   const [sliding, setSliding]     = useState(false);
   const [showSuspended, setShowSuspended] = useState(false);
+  const [showShopClosed, setShowShopClosed] = useState(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
     if (searchParams.get('suspended') === '1') {
       setShowSuspended(true);
-      // Clean URL without reload
+      window.history.replaceState({}, '', '/login');
+    }
+    if (searchParams.get('shop_suspended') === '1') {
+      setShowShopClosed(true);
       window.history.replaceState({}, '', '/login');
     }
   }, [searchParams]);
@@ -109,7 +113,9 @@ export default function AuthPage() {
         else window.location.href = '/customer/dashboard';
       } else {
         const msg = result.message || 'Invalid email or password.';
-        if (msg.includes('suspended')) {
+        if (msg === 'SHOP_SUSPENDED') {
+          setShowShopClosed(true);
+        } else if (msg.includes('suspended')) {
           setShowSuspended(true);
         } else {
           setLoginError(msg);
@@ -380,6 +386,38 @@ export default function AuthPage() {
               Contact: <span className="text-cyan-400 font-bold">support@welaund.com</span>
             </p>
             <button onClick={() => setShowSuspended(false)}
+              className="w-full py-3 rounded-xl font-black text-sm text-white/70 hover:text-white transition-colors"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <FiX size={14} className="inline mr-2" />Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── SHOP CLOSED POPUP ── */}
+      {showShopClosed && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm p-8 rounded-3xl text-center space-y-5"
+            style={{ background: 'rgba(10,20,50,0.97)', border: '1px solid rgba(245,158,11,0.35)', boxShadow: '0 0 60px rgba(245,158,11,0.15)' }}>
+            <div className="flex justify-center">
+              <div className="p-4 rounded-full" style={{ background: 'rgba(245,158,11,0.15)' }}>
+                <span style={{ fontSize: 36 }}>🏪</span>
+              </div>
+            </div>
+            <div>
+              <h2 className="text-xl font-black text-white">Shop Temporarily Closed</h2>
+              <p className="text-white/50 text-sm mt-2 leading-relaxed">
+                Please wait for the shop to open again.
+                Your account is safe — the shop is currently unavailable.
+              </p>
+            </div>
+            <div className="h-px bg-white/8" />
+            <p className="text-[11px] text-white/30">
+              Contact your shop owner or{' '}
+              <span className="text-cyan-400 font-bold">support@welaund.com</span>
+            </p>
+            <button onClick={() => setShowShopClosed(false)}
               className="w-full py-3 rounded-xl font-black text-sm text-white/70 hover:text-white transition-colors"
               style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <FiX size={14} className="inline mr-2" />Close

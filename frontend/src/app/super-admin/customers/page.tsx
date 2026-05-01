@@ -11,7 +11,7 @@ const statusStyle: Record<string,{bg:string;color:string}> = {
   Approved:    {bg:'rgba(16,185,129,0.15)',  color:'#34d399'},
   Pending:     {bg:'rgba(245,158,11,0.15)',  color:'#fbbf24'},
   Disapproved: {bg:'rgba(239,68,68,0.15)',   color:'#f87171'},
-  Inactive:    {bg:'rgba(255,255,255,0.08)', color:'rgba(255,255,255,0.35)'},
+  Inactive:    {bg:'rgba(255,255,255,0.08)', color:'rgba(23, 5, 5, 0.35)'},
 };
 
 const nextOptions: Record<string,string[]> = {
@@ -60,7 +60,7 @@ export default function SuperAdminCustomersPage() {
           const active = filter===s;
           return (
             <button key={s} onClick={()=>setFilter(s)} className="text-[10px] font-black px-3 py-1.5 rounded-full transition-all"
-              style={{ background:active?(st?.bg||'rgba(255,255,255,0.15)'):'rgba(255,255,255,0.06)', color:active?(st?.color||'white'):'rgba(255,255,255,0.4)', border:`1px solid ${active?(st?.color||'rgba(255,255,255,0.3)'):'rgba(255,255,255,0.08)'}` }}>
+              style={{ background:active?(st?.bg||'rgba(24, 20, 20, 0.15)'):'rgba(255,255,255,0.06)', color:active?(st?.color||'white'):'rgba(255,255,255,0.4)', border:`1px solid ${active?(st?.color||'rgba(255,255,255,0.3)'):'rgba(255,255,255,0.08)'}` }}>
               {s==='all'?`All (${customers.length})`:`${s} (${counts[s]||0})`}
             </button>
           );
@@ -71,8 +71,8 @@ export default function SuperAdminCustomersPage() {
       <div className="relative">
         <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={14}/>
         <input type="text" placeholder="Search by name, email or shop..." value={search} onChange={e=>setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white placeholder-white/20 outline-none transition-all"
-          style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.10)'}}/>
+          className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-black placeholder-white/20 outline-none transition-all"
+          style={{background:'rgba(0, 0, 0, 0.06)',border:'1px solid rgba(11, 5, 5, 0.1)'}}/>
       </div>
 
       <div style={CARD} className="overflow-hidden">

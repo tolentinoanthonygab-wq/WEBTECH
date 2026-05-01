@@ -20,8 +20,8 @@ export default function SuperAdminDashboard() {
   const cards = [
     { label:'Total Revenue',      value:`₱${(stats?.total_revenue||0).toLocaleString('en-PH',{minimumFractionDigits:2})}`, icon:FiDollarSign, accent:'#10b981' },
     { label:'Total Shops',        value:stats?.total_shops||0,        icon:FiShoppingBag, accent:'#00aeef' },
-    { label:'Active Owners',      value:stats?.total_owners||0,       icon:FiUsers,       accent:'#8e66ff' },
-    { label:'Total Staff',        value:stats?.total_staff||0,        icon:FiBriefcase,   accent:'#f59e0b' },
+    { label:'Active Owners',      value:stats?.total_owners||0,       icon:FiUsers,       accent:'#11c735' },
+    { label:'Total Staff',        value:stats?.total_staff||0,        icon:FiUsers,       accent:'#f59e0b' },
     { label:'Total Customers',    value:stats?.total_customers||0,    icon:FiUsers,       accent:'#6366f1' },
     { label:'Pending Approvals',  value:stats?.pending_customers||0,  icon:FiClock,       accent:'#f43f5e' },
   ];
@@ -46,9 +46,9 @@ export default function SuperAdminDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
-          { label:'Manage Shops',    href:'/super-admin/shops',     accent:'#00aeef' },
-          { label:'Manage Owners',   href:'/super-admin/owners',    accent:'#8e66ff' },
-          { label:'Manage Admins',   href:'/super-admin/admins',    accent:'#f43f5e' },
+          { label:'Manage Shops',    href:'/super-admin/shops',     accent:'#000000' },
+          { label:'Manage Owners',   href:'/super-admin/owners',    accent:'#020008' },
+          { label:'Manage Admins',   href:'/super-admin/admins',    accent:'#000000' },
         ].map(({ label, href, accent }) => (
           <Link key={href} href={href}>
             <div className="p-4 rounded-2xl text-center font-black text-sm cursor-pointer hover:scale-[1.02] transition-all"

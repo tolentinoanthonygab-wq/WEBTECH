@@ -6,7 +6,8 @@ Cors::handle(['POST', 'OPTIONS']);
 
 require_once __DIR__ . '/../../controllers/AuthController.php';
 
-session_start();
+require_once __DIR__ . '/../../config/Session.php';
+start_session();
 
 $input    = json_decode(file_get_contents('php://input'), true);
 $email    = trim($input['email']    ?? '');

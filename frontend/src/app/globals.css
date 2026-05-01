@@ -31,8 +31,40 @@ tr.hoverable:hover td {
   @apply bg-slate-50;
 }
 
-/* Dark mode base */
-.dark body {
-  background-color: #0f172a;
-  color: #e2e8f0;
+/* ── WeLaund Sky Background ── */
+.welaund-bg {
+  background:
+    radial-gradient(ellipse at 30% 60%, #5e95c2 0%, transparent 25%),
+    radial-gradient(ellipse at 5%  50%, #749ac1 0%, transparent 20%),
+    radial-gradient(ellipse at 35% 80%, #4081b3 0%, transparent 18%),
+    radial-gradient(ellipse at 85% 100%, #7dadd2 0%, transparent 22%),
+    radial-gradient(ellipse at 0%  75%, #5da2cd 0%, transparent 20%),
+    linear-gradient(160deg, #e4f3ff 0%, #d5e8f9 8%, #d3e6f6 15%, #c7d7f0 22%, #aacfec 35%, #a6d2ef 42%, #bdd8ef 55%, #c8def5 65%, #c4dff3 75%, #c8ddf0 85%, #b4d7ed 100%);
 }
+
+/* ── WeLaund Dark Navy Card ── */
+.welaund-card {
+  background: rgba(10, 20, 50, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 1.5rem;
+}
+
+/* ── WeLaund Gradient Button ── */
+.welaund-btn {
+  background: linear-gradient(90deg, #00aeef, #6366f1, #8e66ff);
+  color: white;
+  border-radius: 0.75rem;
+  font-weight: 800;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+.welaund-btn:hover {
+  box-shadow: 0 8px 32px rgba(99,102,241,0.5);
+  transform: scale(1.02);
+}
+.welaund-btn:active { transform: scale(0.98); }
+
+/* ── Scrollbar for dark bg ── */
+.welaund-bg ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
+.welaund-bg ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }

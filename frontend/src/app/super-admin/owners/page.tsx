@@ -1,124 +1,60 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
-import { 
-  Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-  Chip, Spinner, Card, CardBody, User, Button
-} from '@nextui-org/react';
 import { FiRefreshCw } from 'react-icons/fi';
 
-interface Owner {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  status: 'active' | 'inactive';
-  shop_name: string;
-}
+interface Owner { id:string; first_name:string; last_name:string; email:string; status:string; shop_name:string; }
+
+const CARD = { background:'rgba(10,20,50,0.72)', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)', border:'1px solid rgba(255,255,255,0.10)', borderRadius:'1.25rem' };
 
 export default function OwnersManagement() {
   const { user, loading: authLoading } = useRequireRole('super_admin');
   const [owners, setOwners] = useState<Owner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState<string|null>(null);
 
-  const [updating, setUpdating] = useState<string | null>(null);
+  const fetchOwners = async () => { setLoading(true); try { const res=await fetch('/api/super_admin/owners.php'); const d=await res.json(); if(d.success) setOwners(d.data); } catch{} finally{setLoading(false);} };
+  useEffect(() => { if(user) fetchOwners(); }, [user]);
 
-  const fetchOwners = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/super_admin/owners.php');
-      const data = await res.json();
-      if (data.success) setOwners(data.data);
-    } catch { /* silent */ } finally { setLoading(false); }
-  };
-
-  useEffect(() => { if (user) fetchOwners(); }, [user]);
-
-  const toggleStatus = async (id: string, current: string) => {
+  const toggleStatus = async (id:string, current:string) => {
     setUpdating(id);
-    const next = current === 'active' ? 'inactive' : 'active';
-    try {
-      const res = await fetch('/api/super_admin/owners.php', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status: next }),
-      });
-      const data = await res.json();
-      if (data.success) fetchOwners();
-      else alert(data.message);
-    } catch { alert('Update failed'); }
-    finally { setUpdating(null); }
+    const next=current==='active'?'inactive':'active';
+    try { const res=await fetch('/api/super_admin/owners.php',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status:next})}); const d=await res.json(); if(d.success) fetchOwners(); else alert(d.message); } catch{alert('Update failed');} finally{setUpdating(null);}
   };
 
   if (authLoading || !user) return null;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <header className="mb-8 flex justify-between items-center">
+    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-6">
+      <div className="flex flex-wrap justify-between items-center gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Shop Owners</h1>
-          <p className="text-default-500">Global list of all business owners on the platform</p>
+          <h1 className="text-xl md:text-2xl font-black text-white">Shop Owners</h1>
+          <p className="text-white/40 text-sm mt-0.5">All business owners on the platform</p>
         </div>
-        <Button variant="flat" color="primary" startContent={<FiRefreshCw />} onPress={fetchOwners} isLoading={loading}>
-            Refresh
-        </Button>
-      </header>
+        <button onClick={fetchOwners} className="p-2.5 rounded-xl text-white/50 hover:text-white transition-colors" style={{background:'rgba(255,255,255,0.08)'}}><FiRefreshCw size={14} className={loading?'animate-spin':''}/></button>
+      </div>
 
-      {loading ? (
-        <div className="flex justify-center p-12">
-          <Spinner size="lg" label="Loading owners..." />
-        </div>
-      ) : (
-        <Table aria-label="Owners Management Table" shadow="sm" className="rounded-2xl overflow-hidden">
-          <TableHeader>
-            <TableColumn>OWNER</TableColumn>
-            <TableColumn>ASSOCIATED SHOP</TableColumn>
-            <TableColumn>STATUS</TableColumn>
-            <TableColumn align="center">ACTIONS</TableColumn>
-          </TableHeader>
-          <TableBody emptyContent="No owners found.">
-            {owners.map((owner) => (
-              <TableRow key={owner.id}>
-                <TableCell>
-                  <User
-                    name={`${owner.first_name} ${owner.last_name}`}
-                    description={owner.email}
-                  />
-                </TableCell>
-                <TableCell>
-                  <span className="font-bold text-primary bg-primary/10 px-3 py-1 rounded-full text-xs">
-                    {owner.shop_name || 'No Shop Assigned'}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <Chip 
-                    color={owner.status === 'active' ? 'success' : 'danger'} 
-                    variant="flat" 
-                    size="sm"
-                    className="font-bold"
-                  >
-                    {owner.status.toUpperCase()}
-                  </Chip>
-                </TableCell>
-                <TableCell>
-                  <div className="flex justify-center gap-2">
-                    <Button
-                      size="sm"
-                      color={owner.status === 'active' ? 'danger' : 'success'}
-                      variant="flat"
-                      className="font-bold"
-                      isLoading={updating === owner.id}
-                      onPress={() => toggleStatus(owner.id, owner.status)}
-                    >
-                      {owner.status === 'active' ? 'Suspend Owner' : 'Activate Owner'}
-                    </Button>
+      <div style={CARD} className="overflow-hidden">
+        {loading ? <p className="text-center text-white/30 py-10 text-sm">Loading...</p>
+        : owners.length===0 ? <p className="text-center text-white/25 py-10 text-sm">No owners found.</p>
+        : <div className="divide-y divide-white/5">
+            {owners.map(o => (
+              <div key={o.id} className="px-5 py-4 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-bold text-white text-sm">{o.first_name} {o.last_name}</p>
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0" style={{background:o.status==='active'?'rgba(16,185,129,0.15)':'rgba(239,68,68,0.15)',color:o.status==='active'?'#34d399':'#f87171'}}>{o.status.toUpperCase()}</span>
                   </div>
-                </TableCell>
-              </TableRow>
+                  <p className="text-white/40 text-xs truncate mt-0.5">{o.email}</p>
+                  <p className="text-cyan-400/60 text-xs font-semibold mt-0.5">{o.shop_name||'No Shop'}</p>
+                </div>
+                <button onClick={()=>toggleStatus(o.id,o.status)} disabled={updating===o.id} className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105 disabled:opacity-50" style={{background:o.status==='active'?'rgba(239,68,68,0.15)':'rgba(16,185,129,0.15)',color:o.status==='active'?'#f87171':'#34d399'}}>
+                  {updating===o.id?'...':(o.status==='active'?'Suspend':'Activate')}
+                </button>
+              </div>
             ))}
-          </TableBody>
-        </Table>
-      )}
+          </div>}
+      </div>
     </div>
   );
 }

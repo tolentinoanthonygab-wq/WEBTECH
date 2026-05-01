@@ -1,131 +1,297 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
-import { Skeleton } from '@nextui-org/react';
-import { FiTrendingUp, FiUsers, FiSettings, FiPackage, FiBarChart2, FiArrowRight } from 'react-icons/fi';
+import { FiTrendingUp, FiUsers, FiSettings, FiPackage, FiBarChart2, FiArrowRight, FiCalendar, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Link from 'next/link';
 
 interface OwnerStats {
+  daily: number;
   monthly: any[];
   yearly: any[];
   stats: { total_staff: number; total_services: number; total_customers?: number; pending_customers?: number; };
 }
 
+const CARD = {
+  background: 'rgba(10,20,50,0.72)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
+  border: '1px solid rgba(255,255,255,0.10)',
+  borderRadius: '1.25rem',
+};
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
 export default function OwnerDashboard() {
   const { user, loading: authLoading } = useRequireRole('owner');
-  const [data, setData] = useState<OwnerStats | null>(null);
+  const [data, setData]     = useState<OwnerStats | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const now = new Date();
+  const [calYear,  setCalYear]  = useState(now.getFullYear());
+  const [calMonth, setCalMonth] = useState(now.getMonth() + 1); // 1-12
+  const [calData,  setCalData]  = useState<Record<number, number>>({});
+  const [calLoading, setCalLoading] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   useEffect(() => {
     if (user) {
       fetch('/api/owner/stats.php')
-        .then(res => res.json())
+        .then(r => r.json())
         .then(res => { if (res.success) setData(res.data); setLoading(false); })
         .catch(() => setLoading(false));
     }
   }, [user]);
 
-  if (authLoading || !user) return null;
+  const fetchCalendar = useCallback(async (y: number, m: number) => {
+    setCalLoading(true);
+    setSelectedDay(null);
+    try {
+      const res  = await fetch(`/api/owner/calendar.php?year=${y}&month=${m}`);
+      const json = await res.json();
+      if (json.success) {
+        const map: Record<number, number> = {};
+        json.data.forEach((d: any) => { map[d.day] = parseFloat(d.total); });
+        setCalData(map);
+      }
+    } catch { } finally { setCalLoading(false); }
+  }, []);
 
-  const statCards = [
-    { label: 'Monthly Income',   value: `₱${parseFloat(data?.monthly?.[0]?.total || 0).toLocaleString()}`, icon: FiTrendingUp, color: 'violet' },
-    { label: 'Total Staff',      value: data?.stats?.total_staff || 0,                                      icon: FiUsers,      color: 'blue' },
-    { label: 'Total Customers',  value: data?.stats?.total_customers || 0,                                  icon: FiUsers,      color: 'emerald', sub: `${data?.stats?.pending_customers || 0} pending` },
-    { label: 'Active Services',  value: data?.stats?.total_services || 0,                                   icon: FiPackage,    color: 'amber' },
-    { label: 'Yearly Total',     value: `₱${parseFloat(data?.yearly?.[0]?.total || 0).toLocaleString()}`,  icon: FiBarChart2,  color: 'rose' },
-  ];
+  useEffect(() => { if (user) fetchCalendar(calYear, calMonth); }, [user, calYear, calMonth, fetchCalendar]);
 
-  const colorMap: Record<string, string> = {
-    violet:  'bg-violet-50 text-violet-600 border-violet-100',
-    blue:    'bg-blue-50 text-blue-600 border-blue-100',
-    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    amber:   'bg-amber-50 text-amber-600 border-amber-100',
-    rose:    'bg-rose-50 text-rose-600 border-rose-100',
+  const prevMonth = () => {
+    if (calMonth === 1) { setCalYear(y => y - 1); setCalMonth(12); }
+    else setCalMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (calMonth === 12) { setCalYear(y => y + 1); setCalMonth(1); }
+    else setCalMonth(m => m + 1);
   };
 
+  if (authLoading || !user) return null;
+
+  const currentMonthData = data?.monthly?.find(
+    (m: any) => m.month === now.getMonth() + 1 && m.year === now.getFullYear()
+  );
+  const monthlyTotal = parseFloat(currentMonthData?.total || 0);
+  const yearlyTotal  = parseFloat(data?.yearly?.[0]?.total || 0);
+  const dailyTotal   = parseFloat(data?.daily ?? 0);
+
+  const statCards = [
+    { label: 'Daily Income',   value: `₱${dailyTotal.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}`,   icon: FiTrendingUp, accent: '#00aeef' },
+    { label: 'Monthly Income', value: `₱${monthlyTotal.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}`, icon: FiCalendar,   accent: '#8e66ff', sub: now.toLocaleString('default',{month:'long',year:'numeric'}) },
+    { label: 'Total Staff',    value: data?.stats?.total_staff    || 0, icon: FiUsers,    accent: '#6366f1' },
+    { label: 'Customers',      value: data?.stats?.total_customers || 0, icon: FiUsers,   accent: '#10b981', sub: `${data?.stats?.pending_customers||0} pending` },
+    { label: 'Services',       value: data?.stats?.total_services  || 0, icon: FiPackage, accent: '#f59e0b' },
+    { label: 'Yearly Total',   value: `₱${yearlyTotal.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}`,  icon: FiBarChart2,  accent: '#f43f5e' },
+  ];
+
+  // Build calendar grid
+  const firstDay   = new Date(calYear, calMonth - 1, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const maxIncome  = Math.max(...Object.values(calData), 1);
+  const calMonthTotal = Object.values(calData).reduce((a, b) => a + b, 0);
+
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Hello, {user.first_name}! 👋</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Business Dashboard — {user.shop_name}</p>
+          <h1 className="text-xl md:text-2xl font-black text-white">Hello, {user.first_name}! 👋</h1>
+          <p className="text-white/40 text-sm mt-0.5">Business Dashboard — {user.shop_name}</p>
         </div>
         <Link href="/owner/settings">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-violet-300 text-slate-700 text-sm font-semibold rounded-xl shadow-card transition-all">
+          <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white/70 hover:text-white transition-all"
+            style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)' }}>
             <FiSettings size={14} /> Shop Settings
           </button>
         </Link>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {statCards.map(({ label, value, icon: Icon, color, sub }) => (
-          <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-card p-5 hover:-translate-y-0.5 transition-transform">
-            <div className={`inline-flex p-2.5 rounded-xl border mb-3 ${colorMap[color]}`}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {statCards.map(({ label, value, icon: Icon, accent, sub }: any) => (
+          <div key={label} className="p-4 hover:-translate-y-0.5 transition-transform" style={CARD}>
+            <div className="p-2.5 rounded-xl inline-flex mb-3" style={{ background: `${accent}22`, color: accent }}>
               <Icon size={16} />
             </div>
-            {loading ? (
-              <Skeleton className="h-7 w-20 rounded-lg" />
-            ) : (
-              <p className="text-xl font-bold text-slate-900">{value}</p>
-            )}
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mt-1">{label}</p>
-            {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
+            {loading
+              ? <div className="h-6 w-16 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.08)' }} />
+              : <p className="text-lg font-black text-white leading-tight">{value}</p>
+            }
+            <p className="text-[10px] font-bold text-white/40 uppercase tracking-wide mt-1">{label}</p>
+            {sub && <p className="text-[10px] text-white/25 mt-0.5">{sub}</p>}
           </div>
         ))}
       </div>
 
-      {/* Income Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-card p-6">
-          <h3 className="font-semibold text-slate-800 mb-6">Monthly Income</h3>
-          <div className="h-48 flex items-end gap-2 overflow-x-auto pb-2">
-            {data?.monthly?.length ? (
-              data.monthly.slice(0, 12).reverse().map((m, i) => {
-                const max = Math.max(...data.monthly.map((x: any) => x.total), 1);
-                const height = Math.max((m.total / max) * 100, 4);
-                return (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-2 min-w-[32px] group">
-                    <div className="relative w-full">
-                      <div
-                        className="w-full bg-violet-500 hover:bg-violet-600 rounded-t-lg transition-all cursor-pointer"
-                        style={{ height: `${(height / 100) * 192}px` }}
-                      >
-                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                          ₱{parseFloat(m.total).toLocaleString()}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase">
-                      {new Date(2000, m.month - 1).toLocaleString('default', { month: 'short' })}
-                    </span>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="w-full flex items-center justify-center text-slate-300 text-sm italic">
-                No income data yet.
-              </div>
-            )}
+      {/* Calendar + Chart row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        {/* ── Income Calendar ── */}
+        <div className="lg:col-span-2 p-5" style={CARD}>
+
+          {/* Calendar header */}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-black text-white text-sm">Income Calendar</h3>
+              <p className="text-[10px] text-white/30 mt-0.5">Daily income for each day</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={prevMonth}
+                className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/8 transition-all">
+                <FiChevronLeft size={16} />
+              </button>
+              <span className="text-sm font-black text-white min-w-[120px] text-center">
+                {MONTHS[calMonth - 1]} {calYear}
+              </span>
+              <button onClick={nextMonth}
+                className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/8 transition-all">
+                <FiChevronRight size={16} />
+              </button>
+            </div>
           </div>
+
+          {/* Month total */}
+          <div className="flex items-center justify-between mb-4 px-3 py-2.5 rounded-xl"
+            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <span className="text-xs font-bold text-white/40">Total for {MONTHS[calMonth-1]}</span>
+            <span className="font-black text-white">
+              ₱{calMonthTotal.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          </div>
+
+          {/* Day headers */}
+          <div className="grid grid-cols-7 mb-1">
+            {DAYS.map(d => (
+              <div key={d} className="text-center text-[10px] font-black text-white/25 uppercase py-1">{d}</div>
+            ))}
+          </div>
+
+          {/* Calendar grid */}
+          {calLoading ? (
+            <div className="h-48 flex items-center justify-center text-white/30 text-sm">Loading...</div>
+          ) : (
+            <div className="grid grid-cols-7 gap-1">
+              {/* Empty cells before first day */}
+              {Array.from({ length: firstDay }).map((_, i) => (
+                <div key={`e${i}`} />
+              ))}
+
+              {/* Day cells */}
+              {Array.from({ length: daysInMonth }).map((_, i) => {
+                const day     = i + 1;
+                const income  = calData[day] || 0;
+                const hasIncome = income > 0;
+                const intensity = hasIncome ? Math.max(0.15, income / maxIncome) : 0;
+                const isToday = day === now.getDate() && calMonth === now.getMonth() + 1 && calYear === now.getFullYear();
+                const isSelected = selectedDay === day;
+
+                return (
+                  <button
+                    key={day}
+                    onClick={() => setSelectedDay(isSelected ? null : day)}
+                    className="relative flex flex-col items-center justify-center rounded-xl py-1.5 transition-all hover:scale-105"
+                    style={{
+                      background: isSelected
+                        ? 'linear-gradient(135deg,#00aeef,#8e66ff)'
+                        : hasIncome
+                          ? `rgba(0,174,239,${intensity * 0.35})`
+                          : 'rgba(255,255,255,0.03)',
+                      border: isToday
+                        ? '1px solid rgba(0,174,239,0.6)'
+                        : '1px solid rgba(255,255,255,0.04)',
+                      minHeight: '44px',
+                    }}
+                  >
+                    <span className={`text-xs font-black ${isSelected ? 'text-white' : isToday ? 'text-cyan-400' : 'text-white/70'}`}>
+                      {day}
+                    </span>
+                    {hasIncome && (
+                      <span className={`text-[8px] font-bold leading-none mt-0.5 ${isSelected ? 'text-white/80' : 'text-cyan-400'}`}>
+                        ₱{income >= 1000 ? `${(income/1000).toFixed(1)}k` : income.toFixed(0)}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Selected day detail */}
+          {selectedDay && (
+            <div className="mt-4 px-4 py-3 rounded-xl flex items-center justify-between"
+              style={{ background: 'linear-gradient(135deg,rgba(0,174,239,0.15),rgba(142,102,255,0.15))', border: '1px solid rgba(255,255,255,0.10)' }}>
+              <div>
+                <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                  {MONTHS[calMonth-1]} {selectedDay}, {calYear}
+                </p>
+                <p className="font-black text-white text-lg mt-0.5">
+                  ₱{(calData[selectedDay] || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </div>
+              <span className="text-[10px] font-black px-3 py-1 rounded-full"
+                style={{ background: calData[selectedDay] ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.06)', color: calData[selectedDay] ? '#34d399' : 'rgba(255,255,255,0.3)' }}>
+                {calData[selectedDay] ? 'HAS INCOME' : 'NO INCOME'}
+              </span>
+            </div>
+          )}
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-card p-6">
-          <h3 className="font-semibold text-slate-800 mb-4">Quick Links</h3>
-          <div className="space-y-2">
-            {[
-              { label: 'Manage Staff',    href: '/owner/staff' },
-              { label: 'Manage Services', href: '/owner/services' },
-              { label: 'Shop Settings',   href: '/owner/settings' },
-            ].map(({ label, href }) => (
-              <Link key={href} href={href}>
-                <div className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 border border-slate-100 transition-colors cursor-pointer">
-                  <span className="text-sm font-semibold text-slate-700">{label}</span>
-                  <FiArrowRight size={14} className="text-slate-400" />
-                </div>
-              </Link>
-            ))}
+        {/* Right: Bar chart + Quick links */}
+        <div className="space-y-5">
+
+          {/* Monthly bar chart */}
+          <div className="p-5" style={CARD}>
+            <h3 className="font-black text-white text-sm mb-4">Monthly Overview</h3>
+            <div className="h-36 flex items-end gap-1 overflow-x-auto pb-2">
+              {data?.monthly?.length ? (
+                [...data.monthly].slice(0, 12).reverse().map((m: any, i: number) => {
+                  const max = Math.max(...data.monthly.map((x: any) => parseFloat(x.total)), 1);
+                  const h   = Math.max((parseFloat(m.total) / max) * 100, 4);
+                  const cur = m.month === now.getMonth() + 1 && m.year === now.getFullYear();
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1 min-w-[20px] group">
+                      <div className="relative w-full">
+                        <div className="w-full rounded-t-md transition-all"
+                          style={{ height: `${(h/100)*144}px`, background: cur ? 'linear-gradient(180deg,#00aeef,#8e66ff)' : 'rgba(255,255,255,0.12)' }}>
+                          <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none"
+                            style={{ background: 'rgba(10,20,50,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            ₱{parseFloat(m.total).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-[8px] font-bold text-white/25 uppercase">
+                        {new Date(2000, m.month-1).toLocaleString('default',{month:'short'})}
+                      </span>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="w-full flex items-center justify-center text-white/20 text-xs italic">No data yet.</div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick links */}
+          <div className="p-5" style={CARD}>
+            <h3 className="font-black text-white text-sm mb-3">Quick Links</h3>
+            <div className="space-y-2">
+              {[
+                { label: 'Manage Staff',    href: '/owner/staff' },
+                { label: 'Manage Services', href: '/owner/services' },
+                { label: 'Shop Settings',   href: '/owner/settings' },
+              ].map(({ label, href }) => (
+                <Link key={href} href={href}>
+                  <div className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/8 transition-all cursor-pointer"
+                    style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <span className="text-sm font-semibold text-white/70">{label}</span>
+                    <FiArrowRight size={14} className="text-white/30" />
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>

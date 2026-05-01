@@ -7,7 +7,8 @@ Cors::handle(['POST', 'DELETE', 'OPTIONS']);
 require_once __DIR__ . '/../../controllers/AuthController.php';
 require_once __DIR__ . '/../../controllers/StaffController.php';
 
-session_start();
+require_once __DIR__ . '/../../config/Session.php';
+start_session();
 AuthController::requireRole('staff');
 
 $staff = new StaffController($_SESSION['shop_id'], $_SESSION['user_id']);

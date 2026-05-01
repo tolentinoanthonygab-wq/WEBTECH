@@ -14,10 +14,11 @@ export default function MobileSidebarWrapper({ children }: { children: React.Rea
       {/* Hamburger — mobile only */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-3 left-3 z-50 p-2 bg-white rounded-xl shadow-md border border-slate-100 md:hidden"
+        className="fixed top-3 left-3 z-50 p-2 rounded-xl md:hidden"
+        style={{ background: 'rgba(10,20,50,0.82)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(12px)' }}
         aria-label="Open menu"
       >
-        <FiMenu size={18} className="text-slate-700" />
+        <FiMenu size={18} className="text-white" />
       </button>
 
       {/* Backdrop */}

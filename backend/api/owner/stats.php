@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-session_start();
+require_once __DIR__ . '/../../config/Session.php';
+start_session();
 
 require_once __DIR__ . '/../../config/Cors.php';
 Cors::handle(['GET', 'OPTIONS']);
@@ -26,14 +27,15 @@ $customers = $controller->getTotalCustomers();
 echo json_encode([
     'success' => true,
     'data'    => [
+        'daily'    => $controller->getDailyIncome(),
         'monthly'  => $controller->getMonthlyIncome(),
         'yearly'   => $controller->getYearlyIncome(),
         'stats'    => [
-            'total_staff'       => count($controller->getAllStaff()),
-            'total_services'    => count($controller->getServices()),
-            'total_customers'   => (int)($customers['total']    ?? 0),
-            'approved_customers'=> (int)($customers['approved'] ?? 0),
-            'pending_customers' => (int)($customers['pending']  ?? 0),
+            'total_staff'        => count($controller->getAllStaff()),
+            'total_services'     => count($controller->getServices()),
+            'total_customers'    => (int)($customers['total']    ?? 0),
+            'approved_customers' => (int)($customers['approved'] ?? 0),
+            'pending_customers'  => (int)($customers['pending']  ?? 0),
         ]
     ]
 ]);

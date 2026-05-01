@@ -14,7 +14,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost/newWeb/backend/api/:path*',
+        destination: 'http://localhost/gitNEWWEB/backend/api/:path*',
       },
     ];
   },

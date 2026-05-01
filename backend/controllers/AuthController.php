@@ -77,7 +77,7 @@ class AuthController
         $user = $stmt->fetch();
 
         if (!$user) return 'Account not found.';
-        if ($user['status'] !== 'active') return 'Account inactive.';
+        if ($user['status'] !== 'active') return 'Your account has been suspended by the developer. Please contact support.';
         if (!password_verify($password, $user['password_hash'])) return 'Incorrect password.';
 
         $fullName = $user['first_name'] . ' ' . $user['last_name'];
@@ -88,16 +88,19 @@ class AuthController
     private function loginStaff(string $email, string $password): bool|string
     {
         $stmt = $this->db->prepare(
-            'SELECT st.id, st.first_name, st.last_name, st.password_hash, st.status, st.shop_id, s.shop_name
+            'SELECT st.id, st.first_name, st.last_name, st.password_hash, st.status, st.shop_id, s.shop_name,
+                    o.status AS owner_status
              FROM staff st
              JOIN laundry_shops s ON s.id = st.shop_id
+             JOIN owners o        ON o.id = s.owner_id
              WHERE st.email = :email LIMIT 1'
         );
         $stmt->execute([':email' => $email]);
         $user = $stmt->fetch();
 
         if (!$user) return 'Account not found.';
-        if ($user['status'] !== 'active') return 'Account inactive.';
+        if ($user['owner_status'] !== 'active') return 'SHOP_SUSPENDED';
+        if ($user['status'] !== 'active') return 'Your account has been suspended by the developer. Please contact support.';
         if (!password_verify($password, $user['password_hash'])) return 'Incorrect password.';
 
         $fullName = $user['first_name'] . ' ' . $user['last_name'];
@@ -131,7 +134,10 @@ class AuthController
 
     private function startSession($id, $fullName, $firstName, $email, $role, $shopId = '', $shopName = '', $status = 'active'): void
     {
-        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            require_once __DIR__ . '/../config/Session.php';
+            start_session();
+        }
         session_regenerate_id(true);
         $_SESSION['user_id']    = $id;
         $_SESSION['user_name']  = $fullName;

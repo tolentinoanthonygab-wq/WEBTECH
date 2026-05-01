@@ -229,6 +229,39 @@ class OwnerController
         return $stmt->fetchAll();
     }
 
+    /** Today's income for this shop */
+    public function getDailyIncome(): float
+    {
+        $stmt = $this->db->prepare(
+            'SELECT COALESCE(SUM(p.amount_paid), 0)
+             FROM payments p
+             JOIN orders o ON o.id = p.order_id
+             WHERE o.shop_id = :shop_id
+               AND DATE(p.created_on) = CURRENT_DATE'
+        );
+        $stmt->execute([':shop_id' => $this->shopId]);
+        return (float) $stmt->fetchColumn();
+    }
+
+    /** Daily income for a specific year+month */
+    public function getDailyIncomeByMonth(int $year, int $month): array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT
+                 EXTRACT(DAY FROM p.created_on)::INT AS day,
+                 SUM(p.amount_paid) AS total
+             FROM payments p
+             JOIN orders o ON o.id = p.order_id
+             WHERE o.shop_id = :shop_id
+               AND EXTRACT(YEAR  FROM p.created_on)::INT = :year
+               AND EXTRACT(MONTH FROM p.created_on)::INT = :month
+             GROUP BY day
+             ORDER BY day ASC'
+        );
+        $stmt->execute([':shop_id' => $this->shopId, ':year' => $year, ':month' => $month]);
+        return $stmt->fetchAll();
+    }
+
     /** Yearly income totals for this shop */
     public function getYearlyIncome(): array
     {

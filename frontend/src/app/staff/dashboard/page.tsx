@@ -12,6 +12,14 @@ interface StaffStats {
   recent_orders: any[];
 }
 
+const CARD = {
+  background: 'rgba(10,20,50,0.72)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
+  border: '1px solid rgba(255,255,255,0.10)',
+  borderRadius: '1.25rem',
+};
+
 export default function StaffDashboard() {
   const { user, loading: authLoading } = useRequireRole('staff');
   const [data, setData] = useState<StaffStats | null>(null);
@@ -29,27 +37,23 @@ export default function StaffDashboard() {
   if (authLoading || !user) return null;
 
   const stats = [
-    { label: 'Daily Collection', value: `₱${data?.daily_total?.toLocaleString() || '0'}`, icon: FiDollarSign, color: 'emerald' },
-    { label: 'Ongoing Orders',   value: data?.active_orders || 0,                          icon: FiClock,      color: 'blue' },
-    { label: 'Pending Approvals',value: data?.pending_approvals || 0,                      icon: FiUsers,      color: 'amber' },
+    { label: 'Daily Collection',  value: `₱${data?.daily_total?.toLocaleString() || '0'}`, icon: FiDollarSign, accent: '#10b981' },
+    { label: 'Ongoing Orders',    value: data?.active_orders || 0,                          icon: FiClock,      accent: '#00aeef' },
+    { label: 'Pending Approvals', value: data?.pending_approvals || 0,                      icon: FiUsers,      accent: '#f59e0b' },
   ];
 
-  const colorMap: Record<string, string> = {
-    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    blue:    'bg-blue-50 text-blue-600 border-blue-100',
-    amber:   'bg-amber-50 text-amber-600 border-amber-100',
-  };
-
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 md:space-y-8">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
+
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Hello, {user.first_name}! 👋</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{user.shop_name} — Staff Dashboard</p>
+          <h1 className="text-xl md:text-2xl font-black text-white">Hello, {user.first_name}! 👋</h1>
+          <p className="text-white/40 text-sm mt-0.5">{user.shop_name} — Staff Dashboard</p>
         </div>
         <Link href="/staff/orders/new">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-emerald-200 transition-all">
+          <button className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+            style={{ background: 'linear-gradient(90deg,#00aeef,#6366f1,#8e66ff)', boxShadow: '0 4px 16px rgba(99,102,241,0.4)' }}>
             <FiPlus /> New Order
           </button>
         </Link>
@@ -57,50 +61,51 @@ export default function StaffDashboard() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {stats.map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-card p-6 flex items-center gap-4 hover:-translate-y-0.5 transition-transform">
-            <div className={`p-3 rounded-xl border ${colorMap[color]}`}>
+        {stats.map(({ label, value, icon: Icon, accent }) => (
+          <div key={label} className="p-5 flex items-center gap-4" style={CARD}>
+            <div className="p-3 rounded-xl shrink-0" style={{ background: `${accent}22`, color: accent }}>
               <Icon size={20} />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{label}</p>
-              <p className="text-2xl font-bold text-slate-900 mt-0.5">{value}</p>
+              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{label}</p>
+              <p className="text-2xl font-black text-white mt-0.5">{value}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Recent Orders */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-card overflow-hidden">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
-          <h3 className="font-semibold text-slate-800">Recent Ongoing Orders</h3>
-          <Link href="/staff/orders" className="flex items-center gap-1 text-sm text-emerald-600 font-semibold hover:underline">
-            View All <FiArrowRight size={14} />
+      <div style={CARD} className="overflow-hidden">
+        <div className="flex justify-between items-center px-5 py-4 border-b border-white/8">
+          <h3 className="font-bold text-white text-sm">Recent Ongoing Orders</h3>
+          <Link href="/staff/orders" className="flex items-center gap-1 text-xs text-cyan-400 font-semibold hover:text-cyan-300 transition-colors">
+            View All <FiArrowRight size={12} />
           </Link>
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12"><Spinner /></div>
+          <div className="flex justify-center py-12"><Spinner color="white" /></div>
         ) : !data?.recent_orders?.length ? (
-          <p className="text-center text-slate-400 py-12 text-sm">No ongoing orders at the moment.</p>
+          <p className="text-center text-white/30 py-12 text-sm">No ongoing orders at the moment.</p>
         ) : (
-          <div className="divide-y divide-slate-50">
+          <div className="divide-y divide-white/5">
             {data.recent_orders.map((order, i) => (
               <Link key={i} href={`/staff/orders/${order.id}`}>
-                <div className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                <div className="flex items-center justify-between px-5 py-4 hover:bg-white/5 transition-colors cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center font-black text-sm text-white"
+                      style={{ background: 'linear-gradient(135deg,#00aeef,#8e66ff)' }}>
                       {order.first_name?.[0]}
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-slate-800">{order.order_ref}</p>
-                      <p className="text-xs text-slate-400">{order.first_name} {order.last_name}</p>
+                      <p className="font-bold text-sm text-white">{order.order_ref}</p>
+                      <p className="text-xs text-white/40">{order.first_name} {order.last_name}</p>
                     </div>
                   </div>
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                  <span className={`text-[10px] font-black px-3 py-1 rounded-full ${
                     order.order_status === 'Requested'
-                      ? 'bg-red-50 text-red-600'
-                      : 'bg-amber-50 text-amber-600'
+                      ? 'bg-red-500/15 text-red-400'
+                      : 'bg-amber-500/15 text-amber-400'
                   }`}>
                     {order.order_status === 'Requested' ? 'NEW REQUEST' : 'IN PROGRESS'}
                   </span>

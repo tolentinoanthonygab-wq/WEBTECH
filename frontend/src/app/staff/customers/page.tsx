@@ -1,11 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
-import { 
-  Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, 
-  User, Chip, Button, Tooltip, Card, CardBody 
-} from '@nextui-org/react';
-import { FiCheck, FiX, FiRefreshCw } from 'react-icons/fi';
+import { FiCheck, FiX, FiRefreshCw, FiUsers } from 'react-icons/fi';
 
 interface Customer {
   id: string;
@@ -13,8 +9,23 @@ interface Customer {
   last_name: string;
   email: string;
   contact_number: string;
-  status: 'Pending' | 'Approved' | 'Disapproved';
+  status: 'Pending' | 'Approved' | 'Disapproved' | 'Inactive';
 }
+
+const CARD = {
+  background: 'rgba(10,20,50,0.72)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
+  border: '1px solid rgba(255,255,255,0.10)',
+  borderRadius: '1.25rem',
+};
+
+const statusStyle: Record<string, { bg: string; color: string }> = {
+  Pending:     { bg: 'rgba(245,158,11,0.15)',  color: '#fbbf24' },
+  Approved:    { bg: 'rgba(16,185,129,0.15)',  color: '#34d399' },
+  Disapproved: { bg: 'rgba(239,68,68,0.15)',   color: '#f87171' },
+  Inactive:    { bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.35)' },
+};
 
 export default function StaffCustomersPage() {
   const { user, loading: authLoading } = useRequireRole('staff');
@@ -27,16 +38,10 @@ export default function StaffCustomersPage() {
       const res = await fetch('/api/staff/customers.php');
       const data = await res.json();
       if (data.success) setCustomers(data.data);
-    } catch (err) {
-      console.error('Failed to fetch customers');
-    } finally {
-      setLoading(false);
-    }
+    } catch { } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    if (user) fetchCustomers();
-  }, [user]);
+  useEffect(() => { if (user) fetchCustomers(); }, [user]);
 
   const handleAction = async (id: string, status: string) => {
     try {
@@ -47,90 +52,107 @@ export default function StaffCustomersPage() {
       });
       const data = await res.json();
       if (data.success) fetchCustomers();
-    } catch (err) {
-      alert('Action failed');
-    }
+    } catch { alert('Action failed'); }
   };
 
   if (authLoading) return null;
 
-  return (
-    <div className="p-8 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Customer Approvals</h1>
-          <p className="text-default-500">Review and manage new registrations for {user?.shop_name}</p>
+  const pending    = customers.filter(c => c.status === 'Pending');
+  const approved   = customers.filter(c => c.status === 'Approved');
+  const others     = customers.filter(c => c.status === 'Disapproved' || c.status === 'Inactive');
+
+  const CustomerCard = ({ c }: { c: Customer }) => {
+    const st = statusStyle[c.status] ?? statusStyle.Inactive;
+    return (
+      <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 last:border-0 gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-bold text-white text-sm">{c.first_name} {c.last_name}</p>
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0"
+              style={{ background: st.bg, color: st.color }}>
+              {c.status.toUpperCase()}
+            </span>
+          </div>
+          <p className="text-white/40 text-xs truncate mt-0.5">{c.email}</p>
+          <p className="text-white/30 text-xs">{c.contact_number || 'No contact'}</p>
         </div>
-        <Button 
-          variant="flat" 
-          color="primary" 
-          startContent={<FiRefreshCw />} 
-          onPress={fetchCustomers}
-          isLoading={loading}
-        >
-          Refresh List
-        </Button>
+
+        <div className="flex gap-2 shrink-0">
+          {c.status === 'Pending' && (
+            <>
+              <button onClick={() => handleAction(c.id, 'Approved')}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105"
+                style={{ background: 'rgba(16,185,129,0.2)', color: '#34d399' }}>
+                <FiCheck size={12} /> Approve
+              </button>
+              <button onClick={() => handleAction(c.id, 'Disapproved')}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105"
+                style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>
+                <FiX size={12} /> Reject
+              </button>
+            </>
+          )}
+          {c.status === 'Approved' && (
+            <button onClick={() => handleAction(c.id, 'Inactive')}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105"
+              style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>
+              <FiX size={12} /> Deactivate
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const Section = ({ title, rows, emptyMsg }: { title: string; rows: Customer[]; emptyMsg: string }) => (
+    <div style={CARD} className="overflow-hidden">
+      <div className="px-5 py-4 border-b border-white/8 flex items-center justify-between">
+        <h3 className="font-black text-white/60 text-xs uppercase tracking-widest">{title}</h3>
+        <span className="text-[10px] font-black px-2 py-0.5 rounded-full text-white/40"
+          style={{ background: 'rgba(255,255,255,0.08)' }}>
+          {rows.length}
+        </span>
+      </div>
+      {rows.length === 0
+        ? <p className="text-center text-white/25 py-8 text-sm">{emptyMsg}</p>
+        : rows.map(c => <CustomerCard key={c.id} c={c} />)
+      }
+    </div>
+  );
+
+  return (
+    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-6">
+
+      {/* Header */}
+      <div className="flex flex-wrap justify-between items-center gap-3">
+        <div>
+          <h1 className="text-xl md:text-2xl font-black text-white">Customer Approvals</h1>
+          <p className="text-white/40 text-sm mt-0.5">{user?.shop_name}</p>
+        </div>
+        <button onClick={fetchCustomers}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white/60 hover:text-white transition-colors"
+          style={{ background: 'rgba(255,255,255,0.08)' }}>
+          <FiRefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+          Refresh
+        </button>
       </div>
 
-      <Card className="border-none shadow-sm">
-        <CardBody className="p-0">
-          <Table aria-label="Customer approvals table" removeWrapper>
-            <TableHeader>
-              <TableColumn>CUSTOMER</TableColumn>
-              <TableColumn>CONTACT</TableColumn>
-              <TableColumn>STATUS</TableColumn>
-              <TableColumn align="center">ACTIONS</TableColumn>
-            </TableHeader>
-            <TableBody emptyContent={"No pending registrations found."}>
-              {customers.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell>
-                    <User
-                      name={`${c.first_name} ${c.last_name}`}
-                      description={c.email}
-                    />
-                  </TableCell>
-                  <TableCell>{c.contact_number || 'N/A'}</TableCell>
-                  <TableCell>
-                    <Chip 
-                      color={c.status === 'Pending' ? 'warning' : c.status === 'Approved' ? 'success' : 'danger'} 
-                      variant="flat" 
-                      size="sm"
-                    >
-                      {c.status}
-                    </Chip>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-center gap-2">
-                      {c.status === 'Pending' && (
-                        <>
-                          <Tooltip content="Approve Customer">
-                            <Button isIconOnly size="sm" color="success" variant="flat" onPress={() => handleAction(c.id, 'Approved')}>
-                              <FiCheck />
-                            </Button>
-                          </Tooltip>
-                          <Tooltip content="Disapprove">
-                            <Button isIconOnly size="sm" color="danger" variant="flat" onPress={() => handleAction(c.id, 'Disapproved')}>
-                              <FiX />
-                            </Button>
-                          </Tooltip>
-                        </>
-                      )}
-                      {c.status === 'Approved' && (
-                        <Tooltip content="Deactivate Account">
-                          <Button isIconOnly size="sm" color="danger" variant="light" onPress={() => handleAction(c.id, 'Inactive')}>
-                            <FiX />
-                          </Button>
-                        </Tooltip>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardBody>
-      </Card>
+      {/* Pending alert */}
+      {pending.length > 0 && (
+        <div className="flex items-center gap-3 rounded-2xl px-5 py-4 border border-amber-500/20"
+          style={{ background: 'rgba(245,158,11,0.10)' }}>
+          <FiUsers className="text-amber-400 shrink-0" size={18} />
+          <p className="text-amber-300 font-bold text-sm">
+            <span className="text-amber-400">{pending.length}</span> customer(s) waiting for approval
+          </p>
+        </div>
+      )}
+
+      <Section title="⏳ Pending Approval" rows={pending}  emptyMsg="No pending registrations." />
+      <Section title="✅ Approved"         rows={approved} emptyMsg="No approved customers." />
+      {others.length > 0 && (
+        <Section title="🚫 Rejected / Inactive" rows={others} emptyMsg="" />
+      )}
     </div>
   );
 }

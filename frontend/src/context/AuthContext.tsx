@@ -44,8 +44,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then((res) => {
         console.log('Session response:', res);
         if (res.success) {
-          setUser(res.data);
-          localStorage.setItem('welaund_session', JSON.stringify(res.data));
+          if (res.suspended) {
+            // Account suspended — clear session and show message on login page
+            setUser(null);
+            localStorage.removeItem('welaund_session');
+            router.push('/login?suspended=1');
+          } else {
+            setUser(res.data);
+            localStorage.setItem('welaund_session', JSON.stringify(res.data));
+          }
         } else {
           setUser(null);
           localStorage.removeItem('welaund_session');

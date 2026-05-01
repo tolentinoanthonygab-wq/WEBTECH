@@ -9,7 +9,9 @@ export type ServiceUnit = 'per_kg' | 'per_piece';
 export interface AuthUser {
   user_id: string;
   user_name: string;
+  username?: string;
   first_name: string;
+  last_name?: string;
   email: string;
   role: Role;
   shop_id: string;

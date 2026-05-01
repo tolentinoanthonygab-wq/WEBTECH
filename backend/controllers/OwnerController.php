@@ -216,8 +216,8 @@ class OwnerController
     {
         $stmt = $this->db->prepare(
             'SELECT
-                 EXTRACT(YEAR  FROM p.payment_date)::INT AS year,
-                 EXTRACT(MONTH FROM p.payment_date)::INT AS month,
+                 EXTRACT(YEAR  FROM o.created_on)::INT AS year,
+                 EXTRACT(MONTH FROM o.created_on)::INT AS month,
                  SUM(p.amount_paid) AS total
              FROM payments p
              JOIN orders o ON o.id = p.order_id
@@ -237,7 +237,7 @@ class OwnerController
              FROM payments p
              JOIN orders o ON o.id = p.order_id
              WHERE o.shop_id = :shop_id
-               AND DATE(p.created_on) = CURRENT_DATE'
+               AND DATE(o.created_on) = CURRENT_DATE'
         );
         $stmt->execute([':shop_id' => $this->shopId]);
         return (float) $stmt->fetchColumn();
@@ -248,13 +248,13 @@ class OwnerController
     {
         $stmt = $this->db->prepare(
             'SELECT
-                 EXTRACT(DAY FROM p.created_on)::INT AS day,
+                 EXTRACT(DAY FROM o.created_on)::INT AS day,
                  SUM(p.amount_paid) AS total
              FROM payments p
              JOIN orders o ON o.id = p.order_id
              WHERE o.shop_id = :shop_id
-               AND EXTRACT(YEAR  FROM p.created_on)::INT = :year
-               AND EXTRACT(MONTH FROM p.created_on)::INT = :month
+               AND EXTRACT(YEAR  FROM o.created_on)::INT = :year
+               AND EXTRACT(MONTH FROM o.created_on)::INT = :month
              GROUP BY day
              ORDER BY day ASC'
         );
@@ -267,7 +267,7 @@ class OwnerController
     {
         $stmt = $this->db->prepare(
             'SELECT
-                 EXTRACT(YEAR FROM p.payment_date)::INT AS year,
+                 EXTRACT(YEAR FROM o.created_on)::INT AS year,
                  SUM(p.amount_paid) AS total
              FROM payments p
              JOIN orders o ON o.id = p.order_id

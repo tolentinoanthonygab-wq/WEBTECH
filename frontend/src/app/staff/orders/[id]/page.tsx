@@ -5,6 +5,7 @@ import { useRequireRole } from '@/context/AuthContext';
 import { Spinner, Select, SelectItem, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from '@nextui-org/react';
 import { FiArrowLeft, FiCheckCircle, FiX, FiDollarSign, FiPrinter, FiPlus, FiTrash2, FiRefreshCw } from 'react-icons/fi';
 import Link from 'next/link';
+import { fetchJson, readJson } from '@/lib/api';
 
 const statusStyle: Record<string, string> = {
   Requested: 'bg-red-50 text-red-600',
@@ -33,17 +34,27 @@ export default function OrderDetailPage() {
 
   const fetchOrder = async () => {
     try {
-      const res = await fetch(`/api/staff/order_details.php?id=${id}`);
-      const data = await res.json();
+      const data = await fetchJson(`/api/staff/order_details.php?id=${id}`);
       if (data.success) { setOrder(data.data); setAmountPaid(data.data.total_amount?.toString() || ''); }
-    } catch { }
+    } catch (error) {
+      console.error('Failed to fetch order details:', error);
+    }
     finally { setLoading(false); }
+  };
+
+  const fetchServices = async () => {
+    try {
+      const res = await fetchJson('/api/staff/services.php');
+      if (res.success) setServices(res.data);
+    } catch (error) {
+      console.error('Failed to fetch services:', error);
+    }
   };
 
   useEffect(() => {
     if (user && id) {
       fetchOrder();
-      fetch('/api/staff/services.php').then(r => r.json()).then(res => { if (res.success) setServices(res.data); });
+      fetchServices();
     }
   }, [user, id]);
 
@@ -58,7 +69,7 @@ export default function OrderDetailPage() {
     if (!confirm('Permanently delete this order? This cannot be undone.')) return;
     try {
       const res = await fetch(`/api/staff/orders.php?id=${id}`, { method: 'DELETE' });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) router.push('/staff/orders');
       else alert(data.message || 'Delete failed');
     } catch { alert('Network error'); }
@@ -72,7 +83,7 @@ export default function OrderDetailPage() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order_id: id, service_id: selectedService, quantity: parseFloat(itemQty) })
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) { onCalcClose(); setItemQty(''); setSelectedService(''); fetchOrder(); }
       else alert(data.message);
     } catch { alert('Failed to add item'); }
@@ -83,7 +94,7 @@ export default function OrderDetailPage() {
     if (!confirm('Remove this item?')) return;
     try {
       const res = await fetch(`/api/staff/order_items.php?order_id=${id}&item_id=${itemId}`, { method: 'DELETE' });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) fetchOrder(); else alert(data.message);
     } catch { alert('Failed to remove item'); }
   };
@@ -100,7 +111,7 @@ export default function OrderDetailPage() {
           transaction_reference: gcashRef,
         }),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) { onClose(); fetchOrder(); } else alert(data.message || 'Payment failed');
     } catch { alert('Error processing payment'); }
     finally { setPaying(false); }
@@ -318,7 +329,7 @@ export default function OrderDetailPage() {
                   </SelectItem>
                 ))}
               </Select>
-              <button onClick={() => fetch('/api/staff/services.php').then(r => r.json()).then(res => { if (res.success) setServices(res.data); })}
+              <button onClick={fetchServices}
                 className="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-500 transition-all">
                 <FiRefreshCw size={14} />
               </button>

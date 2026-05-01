@@ -4,6 +4,7 @@ import { useRequireRole } from '@/context/AuthContext';
 import { Spinner } from '@nextui-org/react';
 import { FiPlus, FiTrash2, FiCheckCircle, FiShoppingCart, FiUser, FiPackage } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
+import { fetchJson, readJson } from '@/lib/api';
 
 interface Customer { id: string; first_name: string; last_name: string; }
 interface Service  { id: string; service_name: string; unit: string; price_per_unit: number; }
@@ -30,8 +31,12 @@ export default function NewOrderPage() {
 
   useEffect(() => {
     if (user) {
-      fetch('/api/staff/customers.php?type=approved').then(r => r.json()).then(res => setCustomers(res.data || []));
-      fetch('/api/staff/services.php').then(r => r.json()).then(res => setServices(res.data || []));
+      fetchJson('/api/staff/customers.php?type=approved')
+        .then(res => setCustomers(res.data || []))
+        .catch(error => console.error('Failed to fetch approved customers:', error));
+      fetchJson('/api/staff/services.php')
+        .then(res => setServices(res.data || []))
+        .catch(error => console.error('Failed to fetch services:', error));
     }
   }, [user]);
 
@@ -54,7 +59,7 @@ export default function NewOrderPage() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customer_id: selectedCustomer, items: orderItems }),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) { alert(`Order Placed! Reference: ${data.order_ref}`); router.push('/staff/dashboard'); }
     } catch { alert('Order failed'); } finally { setLoading(false); }
   };

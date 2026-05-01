@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
 import { FiCheck, FiX, FiRefreshCw, FiUsers } from 'react-icons/fi';
+import { fetchJson, readJson } from '@/lib/api';
 
 interface Customer {
   id: string;
@@ -35,10 +36,11 @@ export default function StaffCustomersPage() {
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/staff/customers.php');
-      const data = await res.json();
+      const data = await fetchJson('/api/staff/customers.php');
       if (data.success) setCustomers(data.data);
-    } catch { } finally { setLoading(false); }
+    } catch (error) {
+      console.error('Failed to fetch customers:', error);
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { if (user) fetchCustomers(); }, [user]);
@@ -50,7 +52,7 @@ export default function StaffCustomersPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, status }),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) fetchCustomers();
     } catch { alert('Action failed'); }
   };

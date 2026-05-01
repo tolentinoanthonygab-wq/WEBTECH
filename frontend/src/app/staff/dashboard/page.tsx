@@ -4,6 +4,7 @@ import { useRequireRole } from '@/context/AuthContext';
 import { Spinner } from '@nextui-org/react';
 import { FiPlus, FiClock, FiDollarSign, FiUsers, FiArrowRight } from 'react-icons/fi';
 import Link from 'next/link';
+import { fetchJson } from '@/lib/api';
 
 interface StaffStats {
   daily_total: number;
@@ -27,10 +28,12 @@ export default function StaffDashboard() {
 
   useEffect(() => {
     if (user) {
-      fetch('/api/staff/stats.php')
-        .then(res => res.json())
+      fetchJson('/api/staff/stats.php')
         .then(res => { if (res.success) setData(res.data); setLoading(false); })
-        .catch(() => setLoading(false));
+        .catch((error) => {
+          console.error('Failed to fetch staff stats:', error);
+          setLoading(false);
+        });
     }
   }, [user]);
 

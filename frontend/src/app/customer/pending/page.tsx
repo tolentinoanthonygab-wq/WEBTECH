@@ -41,7 +41,7 @@ export default function PendingPage() {
       <Card className="w-full max-w-md text-center shadow-2xl border-none p-4">
         <CardBody className="gap-6 py-10 px-8 flex flex-col items-center">
           <div className="p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <Image src="/logo.png" alt="WeLaund" width={140} height={42} className="mx-auto" />
+            <Image src="/logo.png" alt="WeLaund" width={140} height={42} className="mx-auto" priority />
           </div>
           
           <div className="space-y-2">

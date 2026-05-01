@@ -5,6 +5,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input
 import { FiRefreshCw, FiCheckCircle, FiX, FiDollarSign, FiLink, FiAlertCircle, FiTrash2, FiPlus } from 'react-icons/fi';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { fetchJson, readJson } from '@/lib/api';
 
 interface Order {
   id: string; order_ref: string; order_status: string;
@@ -39,10 +40,11 @@ export default function OrdersListPage() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/staff/orders.php');
-      const data = await res.json();
+      const data = await fetchJson('/api/staff/orders.php');
       if (data.success) setOrders(data.data);
-    } catch { } finally { setLoading(false); }
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { if (user) fetchOrders(); }, [user]);
@@ -55,7 +57,7 @@ export default function OrdersListPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Permanently delete this order?')) return;
     const res = await fetch(`/api/staff/orders.php?id=${id}`, { method: 'DELETE' });
-    const data = await res.json();
+    const data = await readJson(res);
     if (data.success) fetchOrders(); else alert(data.message || 'Delete failed');
   };
 
@@ -71,7 +73,7 @@ export default function OrdersListPage() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order_id: actionOrder.id, amount_paid: parseFloat(amountPaid), payment_method: paymentMethod, transaction_reference: gcashRef }),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) { onClose(); fetchOrders(); } else alert(data.message || 'Payment failed');
     } catch { alert('Error processing payment'); } finally { setPaying(false); }
   };

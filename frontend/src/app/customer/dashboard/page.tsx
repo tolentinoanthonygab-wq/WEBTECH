@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
 import { Spinner } from '@nextui-org/react';
-import { FiPackage, FiMapPin, FiPhone, FiShoppingBag, FiArrowRight, FiPlus, FiClock, FiCheckCircle } from 'react-icons/fi';
+import { FiPackage, FiMapPin, FiPhone, FiShoppingBag, FiArrowRight, FiPlus, FiClock, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import Link from 'next/link';
 
 const CARD = {
@@ -17,15 +17,32 @@ export default function CustomerDashboard() {
   const { user, loading: authLoading } = useRequireRole('customer');
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      fetch('/api/customer/dashboard.php')
-        .then(res => res.json())
-        .then(res => { if (res.success) setData(res.data); setLoading(false); })
-        .catch(() => setLoading(false));
-    }
-  }, [user]);
+  const fetchData = () => {
+    fetch('/api/customer/dashboard.php')
+      .then(res => res.json())
+      .then(res => { if (res.success) setData(res.data); setLoading(false); })
+      .catch(() => setLoading(false));
+  };
+
+  useEffect(() => { if (user) fetchData(); }, [user]);
+
+  const handleCancel = async (orderId: string) => {
+    if (!confirm('Are you sure you want to cancel this order?')) return;
+    setCancelling(orderId);
+    try {
+      const res = await fetch('/api/customer/cancel_order.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId }),
+      });
+      const data = await res.json();
+      if (data.success) fetchData();
+      else alert(data.message || 'Failed to cancel order.');
+    } catch { alert('Connection error.'); }
+    finally { setCancelling(null); }
+  };
 
   if (authLoading || !user) return null;
 
@@ -106,10 +123,23 @@ export default function CustomerDashboard() {
                         <p className="font-black text-white">₱{parseFloat(order.total_amount || '0').toFixed(2)}</p>
                       </div>
                     </div>
-                    <span className="text-[10px] font-black px-3 py-1.5 rounded-full"
-                      style={{ background: order.order_status === 'Ongoing' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.08)', color: order.order_status === 'Ongoing' ? '#f59e0b' : 'rgba(255,255,255,0.4)' }}>
-                      {order.order_status === 'Ongoing' ? 'IN PROGRESS' : 'PENDING'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black px-3 py-1.5 rounded-full"
+                        style={{ background: order.order_status === 'Ongoing' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.08)', color: order.order_status === 'Ongoing' ? '#f59e0b' : 'rgba(255,255,255,0.4)' }}>
+                        {order.order_status === 'Ongoing' ? 'IN PROGRESS' : 'PENDING'}
+                      </span>
+                      {order.order_status === 'Requested' && (
+                        <button
+                          onClick={() => handleCancel(order.id)}
+                          disabled={cancelling === order.id}
+                          className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black transition-all hover:scale-105 disabled:opacity-50"
+                          style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}
+                        >
+                          <FiXCircle size={11} />
+                          {cancelling === order.id ? '...' : 'Cancel'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

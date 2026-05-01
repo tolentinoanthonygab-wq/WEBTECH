@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AuthUser, Role } from '@/types';
+import { fetchJson, readJson } from '@/lib/api';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -37,10 +38,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     console.log('Checking session with server...');
-    fetch(`/api/auth/session.php`, {
+    fetchJson(`/api/auth/session.php`, {
       credentials: 'include',
     })
-      .then((r) => r.json())
       .then((res) => {
         console.log('Session response:', res);
         if (res.success) {
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, role })
       });
-      const data = await res.json();
+      const data = await readJson(res);
       
       if (data.success) {
         updateUserInfo(data.data);

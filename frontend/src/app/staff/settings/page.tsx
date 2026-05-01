@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
 import { Card, CardBody, Input, Button, CardHeader, Divider } from '@nextui-org/react';
 import { FiSave, FiLock, FiUser } from 'react-icons/fi';
+import { readJson } from '@/lib/api';
 
 export default function StaffSettingsPage() {
   const { user, loading: authLoading } = useRequireRole('staff');
@@ -28,7 +29,7 @@ export default function StaffSettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profile),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) alert('Profile updated! Please log in again to see changes.');
     } catch (err) {
       alert('Failed to update profile');
@@ -46,7 +47,7 @@ export default function StaffSettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(passwords),
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (data.success) {
         alert('Password changed successfully!');
         setPasswords({ current: '', new: '', confirm: '' });

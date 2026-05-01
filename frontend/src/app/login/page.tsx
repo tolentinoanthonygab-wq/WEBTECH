@@ -160,7 +160,7 @@ export default function AuthPage() {
       <div className="hidden md:flex w-1/2 flex-col justify-center items-center px-10 relative z-10">
         <div className="mb-8">
           <div className="bg-[#0a0f2e] rounded-2xl px-6 py-3 inline-flex border border-slate-700" style={{ boxShadow: '0 0 40px rgba(34,211,238,0.12)' }}>
-            <Image src="/logo.png" alt="WeLaund" width={200} height={62} className="w-48 h-auto" priority />
+            <Image src="/logo.png" alt="WeLaund" width={200} height={62} className="w-48 h-auto" style={{ height: 'auto' }} priority />
           </div>
         </div>
         <div className="text-center max-w-sm">

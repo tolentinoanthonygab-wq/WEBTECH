@@ -75,7 +75,7 @@ export default function OwnerDashboard() {
   );
   const monthlyTotal = parseFloat(currentMonthData?.total || 0);
   const yearlyTotal  = parseFloat(data?.yearly?.[0]?.total || 0);
-  const dailyTotal   = parseFloat(data?.daily ?? 0);
+  const dailyTotal   = Number(data?.daily ?? 0);
 
   const statCards = [
     { label: 'Daily Income',   value: `₱${dailyTotal.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}`,   icon: FiTrendingUp, accent: '#00aeef' },

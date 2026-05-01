@@ -18,11 +18,17 @@ class Database
         if (self::$instance === null) {
             Env::load();
 
+            $host = Env::get('DB_HOST', 'localhost');
+            $port = Env::get('DB_PORT', '5432');
+            $name = Env::get('DB_NAME', 'welaund');
+            $user = Env::get('DB_USER', 'postgres');
+            $pass = Env::get('DB_PASS', 'postgres');
+
             $dsn = sprintf(
                 'pgsql:host=%s;port=%s;dbname=%s',
-                Env::get('DB_HOST', 'localhost'),
-                Env::get('DB_PORT', '5432'),
-                Env::get('DB_NAME', 'welaund')
+                $host,
+                $port,
+                $name
             );
 
             $options = [
@@ -34,12 +40,21 @@ class Database
             try {
                 self::$instance = new PDO(
                     $dsn,
-                    Env::get('DB_USER', 'postgres'),
-                    Env::get('DB_PASS', 'postgres'),
+                    $user,
+                    $pass,
                     $options
                 );
             } catch (PDOException $e) {
-                error_log('[WeLaund DB] ' . $e->getMessage());
+                error_log(sprintf(
+                    '[WeLaund DB] %s | host=%s port=%s db=%s user=%s pass_len=%d env=%s',
+                    $e->getMessage(),
+                    $host,
+                    $port,
+                    $name,
+                    $user,
+                    strlen($pass),
+                    Env::loadedFile() ?? 'not loaded'
+                ));
                 throw new RuntimeException('Database connection failed. Please try again later.');
             }
         }

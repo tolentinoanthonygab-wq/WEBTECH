@@ -2,56 +2,63 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiHome, FiPlusCircle, FiList, FiCheckCircle, FiLogOut, FiSettings } from 'react-icons/fi';
+import { FiHome, FiPlusCircle, FiList, FiCheckCircle, FiSettings, FiLogOut } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
+import MobileSidebarWrapper from './MobileSidebarWrapper';
 
 const menuItems = [
-  { name: 'Dashboard', path: '/staff/dashboard', icon: <FiHome /> },
-  { name: 'New Order', path: '/staff/orders/new', icon: <FiPlusCircle /> },
-  { name: 'Orders List', path: '/staff/orders', icon: <FiList /> },
-  { name: 'Approvals', path: '/staff/customers', icon: <FiCheckCircle /> },
-  { name: 'Settings', path: '/staff/settings', icon: <FiSettings /> },
+  { name: 'Dashboard',   path: '/staff/dashboard',   icon: FiHome },
+  { name: 'New Order',   path: '/staff/orders/new',  icon: FiPlusCircle },
+  { name: 'Orders List', path: '/staff/orders',      icon: FiList },
+  { name: 'Approvals',   path: '/staff/customers',   icon: FiCheckCircle },
+  { name: 'Settings',    path: '/staff/settings',    icon: FiSettings },
 ];
 
 export default function StaffSidebar() {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
-    <div className="w-64 h-screen bg-content1 border-r border-divider flex flex-col fixed left-0 top-0 z-50">
-      <div className="p-6 flex items-center border-b border-divider">
-        <Image src="/logo.png" alt="WeLaund" width={110} height={34} />
-      </div>
-      
-      <nav className="flex-1 px-4 pt-4 space-y-1">
-        {menuItems.map((item) => {
-          const isActive = pathname === item.path || (pathname.startsWith(item.path + '/') && (item.path !== '/staff/orders' || pathname !== '/staff/orders/new'));
-          return (
-            <Link 
-              key={item.path} 
-              href={item.path}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                isActive 
-                ? 'bg-success text-white shadow-lg shadow-success/30' 
-                : 'text-default-500 hover:bg-default-100'
-              }`}
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span className="font-semibold">{item.name}</span>
-            </Link>
-          );
-        })}
-      </nav>
+    <MobileSidebarWrapper>
+      <div className="w-64 h-screen bg-white border-r border-slate-100 flex flex-col shadow-sm">
+        <div className="px-6 py-5 border-b border-slate-100">
+          <Image src="/logo.png" alt="WeLaund" width={110} height={34} />
+        </div>
 
-      <div className="p-6 border-t border-divider">
-        <button 
-          onClick={() => logout()}
-          className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-danger hover:bg-danger/10 transition-all font-semibold"
-        >
-          <FiLogOut className="text-xl" />
-          <span>Logout</span>
-        </button>
+        {user && (
+          <div className="mx-4 mt-4 mb-2 px-4 py-3 bg-green-50 rounded-xl border border-green-100">
+            <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Staff</p>
+            <p className="font-bold text-green-900 text-sm truncate mt-0.5">{user.first_name} {user.last_name}</p>
+            <p className="text-xs text-green-600 truncate">{user.shop_name}</p>
+          </div>
+        )}
+
+        <nav className="flex-1 px-3 pt-2 space-y-0.5 overflow-y-auto">
+          {menuItems.map(({ name, path, icon: Icon }) => {
+            const active = pathname === path ||
+              (pathname.startsWith(path + '/') && !(path === '/staff/orders' && pathname === '/staff/orders/new'));
+            return (
+              <Link key={path} href={path}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${
+                  active ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                }`}
+              >
+                <Icon className="text-base shrink-0" />
+                <span>{name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-3 border-t border-slate-100">
+          <button onClick={() => logout()}
+            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-all duration-150"
+          >
+            <FiLogOut className="text-base shrink-0" />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
-    </div>
+    </MobileSidebarWrapper>
   );
 }

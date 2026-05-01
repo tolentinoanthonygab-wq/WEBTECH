@@ -19,7 +19,7 @@ class CustomerController
     {
         $stmt = $this->db->prepare(
             "SELECT o.id, o.order_ref, o.order_status, o.total_amount, o.created_on, o.payment_status,
-                    s.shop_name, s.address as shop_address
+                    s.shop_name, s.address as shop_address, s.contact_number as shop_contact
              FROM orders o
              JOIN laundry_shops s ON s.id = o.shop_id
              WHERE o.customer_id = :cid
@@ -35,6 +35,19 @@ class CustomerController
         $stmt = $this->db->prepare(
             "SELECT id, first_name, middle_name, last_name, email, contact_number, address, status 
              FROM customers WHERE id = :cid"
+        );
+        $stmt->execute([':cid' => $this->customerId]);
+        return $stmt->fetch() ?: null;
+    }
+
+    /** Get the shop this customer belongs to */
+    public function getShop(): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT s.shop_name, s.address, s.contact_number
+             FROM laundry_shops s
+             JOIN customers c ON c.shop_id = s.id
+             WHERE c.id = :cid LIMIT 1"
         );
         $stmt->execute([':cid' => $this->customerId]);
         return $stmt->fetch() ?: null;

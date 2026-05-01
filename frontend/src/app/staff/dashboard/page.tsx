@@ -1,8 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
-import { Card, CardBody, Button, Chip, Spinner } from '@nextui-org/react';
-import { FiPlus, FiClock, FiDollarSign, FiUsers } from 'react-icons/fi';
+import { Spinner } from '@nextui-org/react';
+import { FiPlus, FiClock, FiDollarSign, FiUsers, FiArrowRight } from 'react-icons/fi';
 import Link from 'next/link';
 
 interface StaffStats {
@@ -21,128 +21,94 @@ export default function StaffDashboard() {
     if (user) {
       fetch('/api/staff/stats.php')
         .then(res => res.json())
-        .then(res => {
-          if (res.success) {
-            setData(res.data);
-          } else {
-            console.error('Stats fetch failed:', res.message);
-          }
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error('Network error:', err);
-          setLoading(false);
-        });
+        .then(res => { if (res.success) setData(res.data); setLoading(false); })
+        .catch(() => setLoading(false));
     }
   }, [user]);
 
   if (authLoading || !user) return null;
 
+  const stats = [
+    { label: 'Daily Collection', value: `₱${data?.daily_total?.toLocaleString() || '0'}`, icon: FiDollarSign, color: 'emerald' },
+    { label: 'Ongoing Orders',   value: data?.active_orders || 0,                          icon: FiClock,      color: 'blue' },
+    { label: 'Pending Approvals',value: data?.pending_approvals || 0,                      icon: FiUsers,      color: 'amber' },
+  ];
+
+  const colorMap: Record<string, string> = {
+    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    blue:    'bg-blue-50 text-blue-600 border-blue-100',
+    amber:   'bg-amber-50 text-amber-600 border-amber-100',
+  };
+
   return (
-    <div className="p-8">
-      <header className="mb-8 flex justify-between items-center">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 md:space-y-8">
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Hello, {user.first_name}!</h1>
-          <p className="text-default-500 font-medium">Manage {user.shop_name} operations</p>
+          <h1 className="text-2xl font-bold text-slate-900">Hello, {user.first_name}! 👋</h1>
+          <p className="text-slate-500 text-sm mt-0.5">{user.shop_name} — Staff Dashboard</p>
         </div>
         <Link href="/staff/orders/new">
-          <Button color="primary" size="lg" startContent={<FiPlus />} className="font-bold">
-            New Order
-          </Button>
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-emerald-200 transition-all">
+            <FiPlus /> New Order
+          </button>
         </Link>
-      </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <Card className="bg-gradient-to-br from-success to-success-600 text-white border-none shadow-lg">
-          <CardBody className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs font-bold uppercase opacity-80">Daily Collection</p>
-                <h2 className="text-3xl font-extrabold mt-1">₱{data?.daily_total.toLocaleString() || '0'}</h2>
-              </div>
-              <FiDollarSign size={24} className="opacity-40" />
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-primary to-primary-600 text-white border-none shadow-lg">
-          <CardBody className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs font-bold uppercase opacity-80">Ongoing Orders</p>
-                <h2 className="text-3xl font-extrabold mt-1">{data?.active_orders || 0}</h2>
-              </div>
-              <FiClock size={24} className="opacity-40" />
-            </div>
-          </CardBody>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-warning to-warning-600 text-white border-none shadow-lg">
-          <CardBody className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs font-bold uppercase opacity-80">Pending Registrations</p>
-                <h2 className="text-3xl font-extrabold mt-1">{data?.pending_approvals || 0}</h2>
-              </div>
-              <FiUsers size={24} className="opacity-40" />
-            </div>
-          </CardBody>
-        </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2">
-          <CardBody className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold">Recent Ongoing Orders</h3>
-              <Button size="sm" variant="light" color="primary">View All</Button>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {stats.map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-card p-6 flex items-center gap-4 hover:-translate-y-0.5 transition-transform">
+            <div className={`p-3 rounded-xl border ${colorMap[color]}`}>
+              <Icon size={20} />
             </div>
-            
-            {loading ? (
-              <div className="flex justify-center p-8"><Spinner /></div>
-            ) : data?.recent_orders.length === 0 ? (
-              <p className="text-center text-default-400 py-10">No ongoing orders at the moment.</p>
-            ) : (
-              <div className="space-y-3">
-                {data?.recent_orders.map((order, i) => (
-                  <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-default-50 border border-default-100 hover:border-primary/30 transition-colors cursor-pointer">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                        {order.first_name[0]}
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm">{order.order_ref}</p>
-                        <p className="text-xs text-default-500">{order.first_name} {order.last_name}</p>
-                      </div>
-                    </div>
-                    <Chip size="sm" color={order.order_status === 'Requested' ? 'danger' : 'warning'} variant="flat" className="font-bold">
-                      {order.order_status === 'Requested' ? 'NEW REQUEST' : 'IN PROGRESS'}
-                    </Chip>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardBody>
-        </Card>
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{label}</p>
+              <p className="text-2xl font-bold text-slate-900 mt-0.5">{value}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
-        <div className="space-y-6">
-          <Card className="border-none bg-primary/10">
-            <CardBody className="p-6">
-              <h4 className="font-bold mb-2">Quick Tip</h4>
-              <p className="text-sm text-primary-600">Don't forget to weigh items before starting an order to ensure accurate pricing.</p>
-            </CardBody>
-          </Card>
-          
-          <Card>
-            <CardBody className="p-6">
-              <h4 className="font-bold mb-4">Customer Support</h4>
-              <div className="space-y-2">
-                <Button fullWidth variant="flat" size="sm">System Logs</Button>
-                <Button fullWidth variant="flat" size="sm">Help Center</Button>
-              </div>
-            </CardBody>
-          </Card>
+      {/* Recent Orders */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-card overflow-hidden">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100">
+          <h3 className="font-semibold text-slate-800">Recent Ongoing Orders</h3>
+          <Link href="/staff/orders" className="flex items-center gap-1 text-sm text-emerald-600 font-semibold hover:underline">
+            View All <FiArrowRight size={14} />
+          </Link>
         </div>
+
+        {loading ? (
+          <div className="flex justify-center py-12"><Spinner /></div>
+        ) : !data?.recent_orders?.length ? (
+          <p className="text-center text-slate-400 py-12 text-sm">No ongoing orders at the moment.</p>
+        ) : (
+          <div className="divide-y divide-slate-50">
+            {data.recent_orders.map((order, i) => (
+              <Link key={i} href={`/staff/orders/${order.id}`}>
+                <div className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                      {order.first_name?.[0]}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-slate-800">{order.order_ref}</p>
+                      <p className="text-xs text-slate-400">{order.first_name} {order.last_name}</p>
+                    </div>
+                  </div>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                    order.order_status === 'Requested'
+                      ? 'bg-red-50 text-red-600'
+                      : 'bg-amber-50 text-amber-600'
+                  }`}>
+                    {order.order_status === 'Requested' ? 'NEW REQUEST' : 'IN PROGRESS'}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

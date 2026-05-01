@@ -1,14 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
-import { Card, CardBody, Input, Button, CardHeader, Divider } from '@nextui-org/react';
-import { FiSave, FiSettings, FiCreditCard } from 'react-icons/fi';
+import { FiSave, FiSettings, FiCreditCard, FiPhone } from 'react-icons/fi';
 
 export default function OwnerSettingsPage() {
   const { user, loading: authLoading } = useRequireRole('owner');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [shop, setShop] = useState({ shop_name: '', address: '', gcash_number: '', gcash_name: '' });
+  const [shop, setShop] = useState({ shop_name: '', address: '', contact_number: '', gcash_number: '', gcash_name: '' });
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -16,16 +15,11 @@ export default function OwnerSettingsPage() {
       const res = await fetch('/api/owner/settings.php');
       const data = await res.json();
       if (data.success) setShop(data.data);
-    } catch (err) {
-      console.error('Failed to fetch settings');
-    } finally {
-      setLoading(false);
-    }
+    } catch { console.error('Failed to fetch settings'); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    if (user) fetchSettings();
-  }, [user]);
+  useEffect(() => { if (user) fetchSettings(); }, [user]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -37,95 +31,92 @@ export default function OwnerSettingsPage() {
       });
       const data = await res.json();
       if (data.success) alert('Settings saved successfully!');
-    } catch (err) {
-      alert('Error saving settings');
-    } finally {
-      setSaving(false);
-    }
+    } catch { alert('Error saving settings'); }
+    finally { setSaving(false); }
   };
 
   if (authLoading) return null;
 
+  const field = (label: string, key: keyof typeof shop, placeholder = '') => (
+    <div className="space-y-1.5">
+      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{label}</label>
+      <input
+        type="text"
+        value={shop[key]}
+        onChange={e => setShop(p => ({ ...p, [key]: e.target.value }))}
+        placeholder={placeholder}
+        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+      />
+    </div>
+  );
+
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">Shop Settings</h1>
-        <p className="text-default-500">Configure your business profile and payment methods</p>
+    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Shop Settings</h1>
+        <p className="text-slate-500 text-sm mt-0.5">Configure your business profile and payment methods</p>
       </div>
 
-      <Card className="border-none shadow-sm">
-        <CardHeader className="flex gap-3 px-6 py-4">
-          <div className="p-2 bg-primary/10 rounded-lg text-primary">
-            <FiSettings size={20} />
+      {/* General Info */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-card overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100">
+          <div className="p-2 bg-violet-50 rounded-lg text-violet-600"><FiSettings size={16} /></div>
+          <div>
+            <p className="font-semibold text-slate-800 text-sm">General Information</p>
+            <p className="text-xs text-slate-400">Shop name, address, and contact</p>
           </div>
-          <div className="flex flex-col">
-            <p className="text-md font-bold">General Information</p>
-            <p className="text-small text-default-500">Shop name and branch location</p>
+        </div>
+        <div className="p-6 space-y-4">
+          {field('Shop Name', 'shop_name', 'e.g. WeLaund Makati')}
+          {field('Shop Address', 'address', 'e.g. 123 Ayala Ave, Makati')}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Contact Number</label>
+            <div className="relative">
+              <FiPhone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+              <input
+                type="text"
+                value={shop.contact_number}
+                onChange={e => setShop(p => ({ ...p, contact_number: e.target.value }))}
+                placeholder="09XX XXX XXXX"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+              />
+            </div>
           </div>
-        </CardHeader>
-        <Divider />
-        <CardBody className="p-6 gap-4">
-          <Input 
-            label="Shop Name" 
-            variant="bordered" 
-            value={shop.shop_name} 
-            onValueChange={(v) => setShop(p => ({...p, shop_name: v}))} 
-          />
-          <Input 
-            label="Shop Address" 
-            variant="bordered" 
-            value={shop.address} 
-            onValueChange={(v) => setShop(p => ({...p, address: v}))} 
-          />
-        </CardBody>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="border-none shadow-sm">
-        <CardHeader className="flex gap-3 px-6 py-4">
-          <div className="p-2 bg-success/10 rounded-lg text-success">
-            <FiCreditCard size={20} />
+      {/* Payment Methods */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-card overflow-hidden">
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100">
+          <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600"><FiCreditCard size={16} /></div>
+          <div>
+            <p className="font-semibold text-slate-800 text-sm">Payment Methods</p>
+            <p className="text-xs text-slate-400">GCash details for customer payments</p>
           </div>
-          <div className="flex flex-col">
-            <p className="text-md font-bold">Payment Methods</p>
-            <p className="text-small text-default-500">GCash details for customer payments</p>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            {field('GCash Registered Name', 'gcash_name', 'e.g. Maria Santos')}
+            {field('GCash Mobile Number', 'gcash_number', '09XX XXX XXXX')}
           </div>
-        </CardHeader>
-        <Divider />
-        <CardBody className="p-6 gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input 
-              label="GCash Registered Name" 
-              placeholder="e.g. Maria Santos"
-              variant="bordered" 
-              value={shop.gcash_name} 
-              onValueChange={(v) => setShop(p => ({...p, gcash_name: v}))} 
-            />
-            <Input 
-              label="GCash Mobile Number" 
-              placeholder="09XX XXX XXXX"
-              variant="bordered" 
-              value={shop.gcash_number} 
-              onValueChange={(v) => setShop(p => ({...p, gcash_number: v}))} 
-            />
+          <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <p className="text-xs text-emerald-700 font-medium">Customers will see these details during checkout to pay for their laundry.</p>
           </div>
-          <div className="bg-success-50 p-4 rounded-xl border border-success-100 flex gap-3 items-center">
-            <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-            <p className="text-xs text-success-700">Customers will see these details during checkout to pay for their laundry.</p>
-          </div>
-        </CardBody>
-      </Card>
+        </div>
+      </div>
 
-      <div className="flex justify-end pt-4">
-        <Button 
-          color="primary" 
-          size="lg" 
-          className="px-12 font-bold shadow-lg"
-          startContent={<FiSave />}
-          isLoading={saving}
-          onPress={handleSave}
+      {/* Save Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm font-semibold rounded-xl shadow-sm shadow-violet-200 transition-all"
         >
-          Save All Changes
-        </Button>
+          <FiSave size={14} />
+          {saving ? 'Saving...' : 'Save All Changes'}
+        </button>
       </div>
     </div>
   );

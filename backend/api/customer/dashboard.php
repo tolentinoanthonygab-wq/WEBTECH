@@ -20,13 +20,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Default: GET dashboard data
-$orders = $customer->getOrders();
+$orders  = $customer->getOrders();
 $profile = $customer->getProfile();
+$shop    = $customer->getShop();
 
 echo json_encode([
     'success' => true, 
     'data' => [
-        'orders' => $orders,
-        'profile' => $profile
+        'orders'  => $orders,
+        'profile' => $profile,
+        'shop'    => $shop,
     ]
 ]);

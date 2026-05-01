@@ -14,17 +14,18 @@ $owner = new OwnerController($_SESSION['shop_id']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
-    $name  = $input['shop_name']    ?? '';
-    $addr  = $input['address']      ?? '';
-    $gn    = $input['gcash_number'] ?? '';
-    $gm    = $input['gcash_name']   ?? '';
+    $name  = $input['shop_name']       ?? '';
+    $addr  = $input['address']          ?? '';
+    $cn    = $input['contact_number']   ?? '';
+    $gn    = $input['gcash_number']     ?? '';
+    $gm    = $input['gcash_name']       ?? '';
 
     if (!$name || !$addr) {
         echo json_encode(['success' => false, 'message' => 'Shop name and address required']);
         exit;
     }
 
-    $ok = $owner->updateShopSettings($name, $addr, $gn, $gm);
+    $ok = $owner->updateShopSettings($name, $addr, $cn, $gn, $gm);
     echo json_encode(['success' => $ok, 'message' => $ok ? 'Settings saved' : 'Failed to save settings']);
     exit;
 }

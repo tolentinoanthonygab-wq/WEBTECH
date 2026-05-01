@@ -2,7 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 html, body {
   min-height: 100vh;
   font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+/* Sidebar nav link transitions */
+.nav-link {
+  @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150;
+}
+
+/* Stat card hover */
+.stat-card {
+  @apply transition-transform duration-200 hover:-translate-y-0.5;
+}
+
+/* Table row hover */
+tr.hoverable:hover td {
+  @apply bg-slate-50;
+}
+
+/* Dark mode base */
+.dark body {
+  background-color: #0f172a;
+  color: #e2e8f0;
 }

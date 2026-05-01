@@ -177,7 +177,7 @@ class OwnerController
     public function getShop(): ?array
     {
         $stmt = $this->db->prepare(
-            'SELECT id, shop_name, address, gcash_number, gcash_name, status
+            'SELECT id, shop_name, address, contact_number, gcash_number, gcash_name, status
              FROM laundry_shops WHERE id = :shop_id LIMIT 1'
         );
         $stmt->execute([':shop_id' => $this->shopId]);
@@ -187,21 +187,23 @@ class OwnerController
     public function updateShopSettings(
         string $name,
         string $address,
+        string $contactNumber,
         string $gcashNumber,
         string $gcashName
     ): bool {
         $stmt = $this->db->prepare(
             'UPDATE laundry_shops
-             SET shop_name = :name, address = :address,
+             SET shop_name = :name, address = :address, contact_number = :contact_number,
                  gcash_number = :gcash_number, gcash_name = :gcash_name
              WHERE id = :shop_id'
         );
         return $stmt->execute([
-            ':name'         => $name,
-            ':address'      => $address,
-            ':gcash_number' => $gcashNumber,
-            ':gcash_name'   => $gcashName,
-            ':shop_id'      => $this->shopId,
+            ':name'            => $name,
+            ':address'         => $address,
+            ':contact_number'  => $contactNumber,
+            ':gcash_number'    => $gcashNumber,
+            ':gcash_name'      => $gcashName,
+            ':shop_id'         => $this->shopId,
         ]);
     }
 

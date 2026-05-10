@@ -2,9 +2,9 @@
 builder = "NIXPACKS"
 
 [deploy]
-# Nixpacks will automatically determine the best start command (usually Nginx + PHP-FPM)
-# Setting the root to backend ensures the server starts from the correct directory
-root = "backend"
+# Setting root to backend/public ensures that index.php is correctly detected
+# and hides your config/controllers from public access.
+root = "backend/public"
 
 [nixpacks]
 plan = { providers = ["php"] }

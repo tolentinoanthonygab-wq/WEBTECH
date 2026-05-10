@@ -1,9 +1,9 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "echo 'Build skipped (PHP)'"
 
 [deploy]
-startCommand = "apache2-foreground"
+# Nixpacks will automatically determine the best start command (usually Nginx + PHP-FPM)
+# Setting the root to backend ensures the server starts from the correct directory
 root = "backend"
 
 [nixpacks]

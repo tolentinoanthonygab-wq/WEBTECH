@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-//  config/Database.php — PDO Singleton, reads from .env
+#  config/Database.php — PDO Singleton, reads from .env or DATABASE_URL
 // ============================================================
 declare(strict_types=1);
 
@@ -18,19 +18,26 @@ class Database
         if (self::$instance === null) {
             Env::load();
 
-            $host = Env::get('DB_HOST', 'localhost');
-            $port = Env::get('DB_PORT', '5432');
-            $name = Env::get('DB_NAME', 'welaund');
-            $user = Env::get('DB_USER', 'postgres');
-            $pass = Env::get('DB_PASS', 'postgres');
+            // Support Railway/Heroku style DATABASE_URL
+            $dbUrl = getenv('DATABASE_URL') ?: Env::get('DATABASE_URL');
+            
+            if ($dbUrl) {
+                // Parse: postgresql://user:pass@host:port/dbname
+                $parsed = parse_url($dbUrl);
+                $host = $parsed['host'];
+                $port = (string)($parsed['port'] ?? '5432');
+                $user = $parsed['user'];
+                $pass = $parsed['pass'] ?? '';
+                $name = ltrim($parsed['path'], '/');
+            } else {
+                $host = Env::get('DB_HOST', 'localhost');
+                $port = Env::get('DB_PORT', '5432');
+                $name = Env::get('DB_NAME', 'welaund');
+                $user = Env::get('DB_USER', 'postgres');
+                $pass = Env::get('DB_PASS', 'postgres');
+            }
 
-            $dsn = sprintf(
-                'pgsql:host=%s;port=%s;dbname=%s',
-                $host,
-                $port,
-                $name
-            );
-
+            $dsn = sprintf('pgsql:host=%s;port=%s;dbname=%s', $host, $port, $name);
             $options = [
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -38,24 +45,10 @@ class Database
             ];
 
             try {
-                self::$instance = new PDO(
-                    $dsn,
-                    $user,
-                    $pass,
-                    $options
-                );
+                self::$instance = new PDO($dsn, $user, $pass, $options);
             } catch (PDOException $e) {
-                error_log(sprintf(
-                    '[WeLaund DB] %s | host=%s port=%s db=%s user=%s pass_len=%d env=%s',
-                    $e->getMessage(),
-                    $host,
-                    $port,
-                    $name,
-                    $user,
-                    strlen($pass),
-                    Env::loadedFile() ?? 'not loaded'
-                ));
-                throw new RuntimeException('Database connection failed. Please try again later.');
+                error_log('[WeLaund DB Error] ' . $e->getMessage());
+                throw new RuntimeException('Database connection failed.');
             }
         }
 

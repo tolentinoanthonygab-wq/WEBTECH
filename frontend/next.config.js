@@ -6,15 +6,15 @@ const nextConfig = {
   },
   swcMinify: true,
   reactStrictMode: false,
-  onDemandEntries: {
-    maxInactiveAge: 60 * 60 * 1000, // Keep compiled pages in memory for 1 hour
-    pagesBufferLength: 5, // Keep 5 pages in buffer
-  },
   async rewrites() {
+    // In production, NEXT_PUBLIC_BACKEND_URL should be your Railway URL 
+    // e.g. https://welaund-api.up.railway.app
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost/pWeB/WEBTECH/backend';
+    
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost/gitNEWWEB/backend/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

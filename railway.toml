@@ -1,0 +1,13 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "echo 'Build skipped (PHP)'"
+
+[deploy]
+startCommand = "apache2-foreground"
+root = "backend"
+
+[nixpacks]
+plan = { providers = ["php"] }
+
+[nixpacks.phases.setup]
+nixPkgs = ["php82", "php82Extensions.pdo_pgsql", "php82Extensions.pgsql", "php82Extensions.gd", "php82Extensions.mbstring"]

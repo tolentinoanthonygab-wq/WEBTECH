@@ -4,13 +4,16 @@ import PageTransition from '@/components/PageTransition';
 import './globals.css';
 
 export const metadata = {
-  title: 'WeLaund - Laundry Management',
-  description: 'Professional SaaS Laundry Management System',
+  title: 'WeLaund — Smart Laundry Management',
+  description: 'WeLaund is a modern SaaS laundry management platform for shops and customers.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="stylesheet" href="/landing.css" />
+      </head>
       <body>
         <NextUIProvider>
           <AuthProvider>

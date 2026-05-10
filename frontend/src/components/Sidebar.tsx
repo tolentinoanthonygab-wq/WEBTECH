@@ -2,9 +2,11 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiHome, FiShoppingBag, FiUsers, FiUserCheck, FiBriefcase, FiLogOut, FiShield } from 'react-icons/fi';
+import { FiHome, FiShoppingBag, FiUsers, FiUserCheck, FiBriefcase, FiLogOut, FiShield, FiDatabase } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 import MobileSidebarWrapper from './MobileSidebarWrapper';
+import ThemeToggle from './ThemeToggle';
+
 
 const menuItems = [
   { name: 'Dashboard', path: '/super-admin/dashboard', icon: FiHome },
@@ -13,6 +15,7 @@ const menuItems = [
   { name: 'Staff',     path: '/super-admin/staff',     icon: FiBriefcase },
   { name: 'Customers', path: '/super-admin/customers', icon: FiUserCheck },
   { name: 'Admins',    path: '/super-admin/admins',    icon: FiShield },
+  { name: 'Database',  path: '/super-admin/database',  icon: FiDatabase },
 ];
 
 export default function Sidebar() {
@@ -21,7 +24,7 @@ export default function Sidebar() {
 
   return (
     <MobileSidebarWrapper>
-      <div className="w-64 h-screen flex flex-col" style={{ background: 'rgba(10,20,50,0.82)', backdropFilter: 'blur(16px)', borderRight: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="w-64 h-screen flex flex-col shadow-none" style={{ background: 'rgba(10,20,50,0.95)', backdropFilter: 'blur(16px)', borderRight: '1px solid rgba(255,255,255,0.08)' }}>
 
         {/* Logo */}
         <div className="px-5 py-5 border-b border-white/10">
@@ -32,9 +35,12 @@ export default function Sidebar() {
 
         {/* User badge */}
         {user && (
-          <div className="mx-4 mt-4 mb-2 px-4 py-3 rounded-2xl border border-white/10" style={{ background: 'rgba(255,255,255,0.06)' }}>
-            <p className="text-[10px] font-bold text-cyan-400/80 uppercase tracking-widest">Super Admin</p>
-            <p className="font-bold text-white text-sm truncate mt-0.5">{user.first_name || user.username}</p>
+          <div className="mx-4 mt-4 mb-2 px-4 py-3 rounded-2xl border border-white/10 flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <div className="truncate">
+              <p className="text-[10px] font-bold text-cyan-400/80 uppercase tracking-widest">Super Admin</p>
+              <p className="font-bold text-white text-sm truncate mt-0.5">{user.first_name || user.username}</p>
+            </div>
+            <ThemeToggle />
           </div>
         )}
 

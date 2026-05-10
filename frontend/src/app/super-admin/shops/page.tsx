@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
-import { FiPlus, FiMapPin, FiPhone, FiRefreshCw, FiX } from 'react-icons/fi';
+import { FiPlus, FiMapPin, FiPhone, FiRefreshCw, FiX, FiEye, FiEyeOff } from 'react-icons/fi';
 
 interface Shop { id:string; shop_name:string; address:string; gcash_number:string; gcash_name:string; status:string; created_on:string; owner_first:string; owner_last:string; }
 
@@ -15,6 +15,7 @@ export default function ShopsManagement() {
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ shop_name:'', shop_address:'', shop_contact:'', owner_first_name:'', owner_last_name:'', owner_email:'', owner_password:'' });
+  const [showPassword, setShowPassword] = useState(false);
 
   const fetchShops = async () => { setLoading(true); try { const res=await fetch('/api/super_admin/shops.php'); const d=await res.json(); if(d.success) setShops(d.data); } catch{} finally{setLoading(false);} };
   useEffect(() => { if(user) fetchShops(); }, [user]);
@@ -98,12 +99,35 @@ export default function ShopsManagement() {
                   </div>
                 ))}
               </div>
-              {[['owner_email','Email','owner@email.com','email'],['owner_password','Password','Min. 8 characters','password']].map(([k,l,p,t])=>(
+              {[['owner_email', 'Email', 'owner@email.com', 'email']].map(([k, l, p, t]) => (
                 <div key={k} className="group">
                   <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 block">{l}</label>
-                  <div className="relative"><input type={t} placeholder={p} value={(form as any)[k]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} className={inputCls}/><div className="absolute bottom-0 left-0 h-px w-0 bg-gradient-to-r from-cyan-400 to-indigo-400 group-focus-within:w-full transition-all duration-500"/></div>
+                  <div className="relative">
+                    <input type={t} placeholder={p} value={(form as any)[k]} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} className={inputCls} />
+                    <div className="absolute bottom-0 left-0 h-px w-0 bg-gradient-to-r from-cyan-400 to-indigo-400 group-focus-within:w-full transition-all duration-500" />
+                  </div>
                 </div>
               ))}
+
+              <div className="group">
+                <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 block">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Min. 8 characters"
+                    value={form.owner_password}
+                    onChange={e => setForm(f => ({ ...f, owner_password: e.target.value }))}
+                    className={inputCls}
+                  />
+                  <button
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                  </button>
+                  <div className="absolute bottom-0 left-0 h-px w-0 bg-gradient-to-r from-cyan-400 to-indigo-400 group-focus-within:w-full transition-all duration-500" />
+                </div>
+              </div>
             </div>
             <div className="flex gap-3 pt-2">
               <button onClick={()=>setShowModal(false)} className="flex-1 py-3 rounded-xl text-sm font-bold text-white/50 hover:text-white transition-colors" style={{background:'rgba(255,255,255,0.06)'}}>Cancel</button>

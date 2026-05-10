@@ -1,0 +1,271 @@
+/* ============================================================
+   WeLaund Auth Styles — auth.css
+   ============================================================ */
+:root {
+    --wl-fresh:  #0ea5e9;
+    --wl-blue:   #007bff;
+    --wl-dark:   #0f172a;
+    --wl-text:   #475569;
+}
+
+/* ── BACKGROUND ── */
+body.wl-auth-bg {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #0c1445 0%, #0c4a6e 50%, #0f172a 100%);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Animated blobs */
+.wl-blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: .35;
+    pointer-events: none;
+    animation: blobFloat 8s ease-in-out infinite alternate;
+}
+.wl-blob-1 { width: 500px; height: 500px; background: #0ea5e9; top: -150px; left: -150px; animation-delay: 0s; }
+.wl-blob-2 { width: 400px; height: 400px; background: #7c3aed; bottom: -100px; right: -100px; animation-delay: 3s; }
+.wl-blob-3 { width: 300px; height: 300px; background: #0d9488; top: 40%; left: 40%; animation-delay: 1.5s; }
+@keyframes blobFloat {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(30px, 20px) scale(1.08); }
+}
+
+/* ── CENTER WRAPPER ── */
+.wl-auth-center {
+    position: relative; z-index: 10;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 16px;
+}
+.wl-auth-center--wide { justify-content: flex-start; padding-top: 60px; }
+
+/* ── BACK LINK ── */
+.wl-back-link {
+    color: rgba(255,255,255,.7);
+    text-decoration: none; font-size: .85rem;
+    margin-bottom: 20px; align-self: flex-start;
+    transition: color .2s;
+}
+.wl-back-link:hover { color: #fff; }
+
+/* ── GLASS CARD ── */
+.wl-glass-card {
+    width: 100%; max-width: 460px;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,.6);
+    border-radius: 24px;
+    padding: 40px 36px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.25);
+}
+.wl-glass-card--wide { max-width: 640px; }
+
+/* ── LOGO ── */
+.wl-auth-logo {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, var(--wl-fresh), var(--wl-blue));
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; color: #fff;
+    margin: 0 auto;
+    box-shadow: 0 8px 24px rgba(14,165,233,.35);
+}
+
+/* ── LABELS ── */
+.wl-label {
+    display: block;
+    font-size: .82rem; font-weight: 600;
+    color: var(--wl-text);
+    margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: .4px;
+}
+
+/* ── ROLE SWITCHER ── */
+.wl-role-switcher {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 6px; background: #f1f5f9;
+    border-radius: 12px; padding: 5px;
+}
+.wl-role-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 10px 4px; border: none; background: transparent;
+    border-radius: 8px; font-size: .72rem; font-weight: 600;
+    color: var(--wl-text); cursor: pointer; transition: all .2s;
+}
+.wl-role-btn i { font-size: 1.1rem; }
+.wl-role-btn.active {
+    background: #fff; color: var(--wl-fresh);
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+/* ── FIELD / INPUT ── */
+.wl-field {
+    position: relative; display: flex; align-items: center;
+}
+.wl-field > i:first-child {
+    position: absolute; left: 12px; color: #94a3b8;
+    font-size: .95rem; pointer-events: none; z-index: 2;
+}
+.wl-input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-size: .9rem; background: #f8fafc;
+    transition: border-color .2s, box-shadow .2s; outline: none;
+}
+.wl-input:focus {
+    border-color: var(--wl-fresh);
+    box-shadow: 0 0 0 3px rgba(14,165,233,.12);
+    background: #fff;
+}
+.wl-input-plain {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-size: .9rem; background: #f8fafc;
+    transition: border-color .2s, box-shadow .2s; outline: none;
+}
+.wl-input-plain:focus {
+    border-color: var(--wl-fresh);
+    box-shadow: 0 0 0 3px rgba(14,165,233,.12);
+    background: #fff;
+}
+textarea.wl-input-plain { height: auto; resize: vertical; }
+.wl-eye {
+    position: absolute; right: 10px;
+    background: none; border: none; color: #94a3b8;
+    cursor: pointer; padding: 4px; z-index: 2;
+}
+.wl-eye:hover { color: var(--wl-fresh); }
+
+/* ── SHOP SELECTOR ── */
+.wl-shop-selector { position: relative; }
+.wl-shop-trigger {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border: 1.5px solid #e2e8f0; border-radius: 10px;
+    background: #f8fafc; cursor: pointer;
+    font-size: .9rem; transition: border-color .2s;
+    user-select: none;
+}
+.wl-shop-trigger:focus,
+.wl-shop-selector:focus-within .wl-shop-trigger { border-color: var(--wl-fresh); }
+.wl-chevron { transition: transform .25s; color: #94a3b8; }
+.wl-shop-dropdown {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: #fff; border: 1.5px solid #e2e8f0;
+    border-radius: 12px; z-index: 100;
+    box-shadow: 0 12px 40px rgba(0,0,0,.12);
+    display: none; overflow: hidden;
+}
+.wl-shop-dropdown.open { display: block; }
+.wl-shop-search-wrap {
+    position: relative; padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.wl-shop-search-wrap i {
+    position: absolute; left: 22px; top: 50%;
+    transform: translateY(-50%); color: #94a3b8; font-size: .85rem;
+}
+.wl-shop-search {
+    width: 100%; padding: 7px 10px 7px 30px;
+    border: 1.5px solid #e2e8f0; border-radius: 8px;
+    font-size: .85rem; outline: none;
+    transition: border-color .2s;
+}
+.wl-shop-search:focus { border-color: var(--wl-fresh); }
+.wl-shop-list { max-height: 220px; overflow-y: auto; padding: 6px; }
+.wl-shop-option {
+    padding: 10px 12px; border-radius: 8px;
+    font-size: .88rem; cursor: pointer;
+    transition: background .15s; display: flex; align-items: center;
+}
+.wl-shop-option:hover { background: #f0f9ff; color: var(--wl-fresh); }
+.wl-shop-loading, .wl-shop-empty {
+    padding: 16px 12px; font-size: .85rem;
+    color: #94a3b8; display: flex; align-items: center;
+}
+
+/* ── SUBMIT BUTTON ── */
+.wl-submit-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--wl-fresh), #0056b3);
+    color: #fff; border: none; border-radius: 10px;
+    font-weight: 600; height: 48px; font-size: .95rem;
+    transition: opacity .2s, transform .15s; text-decoration: none;
+}
+.wl-submit-btn:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); color: #fff; }
+.wl-submit-btn:disabled { opacity: .7; cursor: not-allowed; }
+
+/* ── ALERTS ── */
+.wl-alert-danger  { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; border-radius: 10px; }
+.wl-alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; border-radius: 10px; }
+
+/* ── LINKS ── */
+.wl-link { color: var(--wl-fresh); text-decoration: none; }
+.wl-link:hover { text-decoration: underline; }
+
+/* ── SUCCESS STATE ── */
+.wl-success-icon {
+    width: 88px; height: 88px;
+    background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; color: var(--wl-fresh);
+    margin: 0 auto;
+    box-shadow: 0 8px 32px rgba(14,165,233,.2);
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS
+══════════════════════════════════════════ */
+
+/* ── Tablet (≤ 768px) ── */
+@media (max-width: 768px) {
+    /* Blobs: scale down to prevent horizontal overflow */
+    .wl-blob-1 { width: 300px; height: 300px; top: -80px; left: -80px; }
+    .wl-blob-2 { width: 250px; height: 250px; bottom: -60px; right: -60px; }
+    .wl-blob-3 { width: 200px; height: 200px; }
+
+    /* Wide card: full width with comfortable padding */
+    .wl-glass-card--wide { max-width: 100%; }
+    .wl-auth-center--wide { padding: 48px 16px 40px; }
+}
+
+/* ── Mobile (≤ 640px) ── */
+@media (max-width: 640px) {
+    .wl-glass-card { padding: 28px 20px; }
+    .wl-glass-card--wide { padding: 24px 16px; }
+
+    /* Role switcher: 2x2 grid */
+    .wl-role-switcher { grid-template-columns: repeat(2, 1fr); }
+
+    /* Auth center: less top padding */
+    .wl-auth-center { padding: 32px 12px; }
+    .wl-auth-center--wide { padding: 40px 12px 32px; }
+
+    /* Back link: smaller */
+    .wl-back-link { font-size: .8rem; }
+
+    /* Submit button: ensure full height on small screens */
+    .wl-submit-btn { height: 46px; font-size: .9rem; }
+
+    /* Shop dropdown: ensure it doesn't overflow viewport */
+    .wl-shop-dropdown { position: fixed; left: 12px; right: 12px; top: auto; }
+}
+
+/* ── Very small phones (≤ 380px) ── */
+@media (max-width: 380px) {
+    .wl-glass-card { padding: 22px 14px; }
+    .wl-role-switcher { grid-template-columns: repeat(2, 1fr); gap: 4px; }
+    .wl-role-btn { padding: 8px 2px; font-size: .68rem; }
+    .wl-role-btn i { font-size: 1rem; }
+    .wl-auth-logo { width: 50px; height: 50px; font-size: 1.3rem; }
+}

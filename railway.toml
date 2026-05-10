@@ -2,9 +2,9 @@
 builder = "NIXPACKS"
 
 [deploy]
-# Setting root to backend/public ensures that index.php is correctly detected
-# and hides your config/controllers from public access.
-root = "backend/public"
+# Using backend as root and relying on the gateway index.php
+# This is the most compatible way for Nixpacks PHP.
+root = "backend"
 
 [nixpacks]
 plan = { providers = ["php"] }

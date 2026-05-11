@@ -1,0 +1,7 @@
+# Ignore frontend and other heavy folders for Railway backend builds
+frontend/
+.next/
+node_modules/
+scratch/
+user_ui_ux.txt
+overview.txt

@@ -2,12 +2,9 @@
 builder = "NIXPACKS"
 
 [deploy]
-# Pointing directly to backend/public now that api and assets are inside.
-# This makes all paths relative and standard.
-root = "backend/public"
+# Using 'backend' as the root directory. 
+# This contains 'index.php' as the entry point and the 'api' folder.
+root = "backend"
 
 [nixpacks]
-plan = { providers = ["php"] }
-
-[nixpacks.phases.setup]
-nixPkgs = ["php82", "php82Extensions.pdo_pgsql", "php82Extensions.pgsql", "php82Extensions.gd", "php82Extensions.mbstring"]
+# Let nixpacks auto-detect everything

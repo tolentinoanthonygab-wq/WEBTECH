@@ -2,9 +2,9 @@
 builder = "NIXPACKS"
 
 [deploy]
-# Using backend as root and relying on the gateway index.php
-# This is the most compatible way for Nixpacks PHP.
-root = "backend"
+# Pointing directly to backend/public now that api and assets are inside.
+# This makes all paths relative and standard.
+root = "backend/public"
 
 [nixpacks]
 plan = { providers = ["php"] }

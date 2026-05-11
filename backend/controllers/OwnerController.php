@@ -176,12 +176,26 @@ class OwnerController
 
     public function getShop(): ?array
     {
-        $stmt = $this->db->prepare(
-            'SELECT id, shop_name, address, contact_number, gcash_number, gcash_name, status
-             FROM laundry_shops WHERE id = :shop_id LIMIT 1'
-        );
-        $stmt->execute([':shop_id' => $this->shopId]);
-        return $stmt->fetch() ?: null;
+        try {
+            $stmt = $this->db->prepare(
+                'SELECT id, shop_name, address, contact_number, gcash_number, gcash_name, status, delivery_available, delivery_fee
+                 FROM laundry_shops WHERE id = :shop_id LIMIT 1'
+            );
+            $stmt->execute([':shop_id' => $this->shopId]);
+            return $stmt->fetch() ?: null;
+        } catch (\Exception $e) {
+            $stmt = $this->db->prepare(
+                'SELECT id, shop_name, address, contact_number, gcash_number, gcash_name, status
+                 FROM laundry_shops WHERE id = :shop_id LIMIT 1'
+            );
+            $stmt->execute([':shop_id' => $this->shopId]);
+            $row = $stmt->fetch();
+            if ($row) {
+                $row['delivery_available'] = 1;
+                $row['delivery_fee'] = 0.0;
+            }
+            return $row ?: null;
+        }
     }
 
     public function updateShopSettings(
@@ -189,22 +203,45 @@ class OwnerController
         string $address,
         string $contactNumber,
         string $gcashNumber,
-        string $gcashName
+        string $gcashName,
+        bool $deliveryAvailable = true,
+        float $deliveryFee = 0.0
     ): bool {
-        $stmt = $this->db->prepare(
-            'UPDATE laundry_shops
-             SET shop_name = :name, address = :address, contact_number = :contact_number,
-                 gcash_number = :gcash_number, gcash_name = :gcash_name
-             WHERE id = :shop_id'
-        );
-        return $stmt->execute([
-            ':name'            => $name,
-            ':address'         => $address,
-            ':contact_number'  => $contactNumber,
-            ':gcash_number'    => $gcashNumber,
-            ':gcash_name'      => $gcashName,
-            ':shop_id'         => $this->shopId,
-        ]);
+        try {
+            $stmt = $this->db->prepare(
+                'UPDATE laundry_shops
+                 SET shop_name = :name, address = :address, contact_number = :contact_number,
+                     gcash_number = :gcash_number, gcash_name = :gcash_name,
+                     delivery_available = :da, delivery_fee = :df
+                 WHERE id = :shop_id'
+            );
+            return $stmt->execute([
+                ':name'            => $name,
+                ':address'         => $address,
+                ':contact_number'  => $contactNumber,
+                ':gcash_number'    => $gcashNumber,
+                ':gcash_name'      => $gcashName,
+                ':da'              => $deliveryAvailable ? 1 : 0,
+                ':df'              => $deliveryFee,
+                ':shop_id'         => $this->shopId,
+            ]);
+        } catch (\Exception $e) {
+            // Fallback for missing columns
+            $stmt = $this->db->prepare(
+                'UPDATE laundry_shops
+                 SET shop_name = :name, address = :address, contact_number = :contact_number,
+                     gcash_number = :gcash_number, gcash_name = :gcash_name
+                 WHERE id = :shop_id'
+            );
+            return $stmt->execute([
+                ':name'            => $name,
+                ':address'         => $address,
+                ':contact_number'  => $contactNumber,
+                ':gcash_number'    => $gcashNumber,
+                ':gcash_name'      => $gcashName,
+                ':shop_id'         => $this->shopId,
+            ]);
+        }
     }
 
     // ─────────────────────────────────────────────────────────

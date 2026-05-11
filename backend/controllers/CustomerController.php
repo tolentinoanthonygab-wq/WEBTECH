@@ -44,7 +44,7 @@ class CustomerController
     public function getShop(): ?array
     {
         $stmt = $this->db->prepare(
-            "SELECT s.shop_name, s.address, s.contact_number
+            "SELECT s.shop_name, s.address, s.contact_number, s.delivery_fee, s.delivery_available, s.gcash_name, s.gcash_number
              FROM laundry_shops s
              JOIN customers c ON c.shop_id = s.id
              WHERE c.id = :cid LIMIT 1"
@@ -96,12 +96,20 @@ class CustomerController
         return $stmt->execute([':hash' => $newHash, ':id' => $this->customerId]);
     }
 
-    public function createRequest(string $shopId, string $type, string $paymentMethod = '', string $notes = ''): string
+    public function createRequest(
+        string $shopId, 
+        string $type, 
+        string $paymentMethod = '', 
+        string $notes = '', 
+        string $refNum = '',
+        string $deliveryAddress = '',
+        float $deliveryFee = 0.0
+    ): string
     {
         $orderRef = 'REQ-' . strtoupper(substr(uniqid('', true), -6));
         $stmt = $this->db->prepare(
-            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status, payment_method, notes)
-             VALUES (:ref, :cid, :sid, :type, 'Requested', :pm, :notes)"
+            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status, payment_method, notes, reference_number, delivery_address, delivery_fee)
+             VALUES (:ref, :cid, :sid, :type, 'Requested', :pm, :notes, :rnum, :daddr, :dfee)"
         );
         $stmt->execute([
             ':ref'   => $orderRef,
@@ -109,7 +117,10 @@ class CustomerController
             ':sid'   => $shopId,
             ':type'  => $type,
             ':pm'    => $paymentMethod,
-            ':notes' => $notes
+            ':notes' => $notes,
+            ':rnum'  => $refNum,
+            ':daddr' => $deliveryAddress,
+            ':dfee'  => $deliveryFee
         ]);
         return $orderRef;
     }

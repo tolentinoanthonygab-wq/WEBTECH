@@ -35,12 +35,21 @@ export default function CustomerRequestPage() {
   const [rows, setRows]                   = useState<EstRow[]>([
     { id: 1, serviceId: '', type: 'Colored', qty: '' },
   ]);
+  const [refNum, setRefNum]               = useState('');
+  const [shop, setShop]                   = useState<any>(null);
+  const [deliveryAddress, setDeliveryAddress] = useState('');
 
   useEffect(() => {
     if (user) {
       fetch('/api/customer/request_order.php')
         .then(r => r.json())
-        .then(res => { if (res.success) setServices(res.data); })
+        .then(res => { 
+          if (res.success) {
+            setServices(res.data);
+            setShop(res.shop);
+            if (res.shop?.address) setDeliveryAddress(res.shop.address);
+          }
+        })
         .finally(() => setLoading(false));
     }
   }, [user]);
@@ -60,7 +69,7 @@ export default function CustomerRequestPage() {
     return svc ? svc.price_per_unit * q : 0;
   };
 
-  const grandTotal = rows.reduce((sum, r) => sum + getSubtotal(r), 0);
+  const grandTotal = rows.reduce((sum, r) => sum + getSubtotal(r), 0) + (orderType === 'Delivery' ? (parseFloat(shop?.delivery_fee) || 0) : 0);
 
   const buildNotes = () =>
     rows
@@ -77,7 +86,14 @@ export default function CustomerRequestPage() {
       const res = await fetch('/api/customer/request_order.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: orderType, payment_method: paymentMethod, notes: buildNotes() }),
+        body: JSON.stringify({ 
+          type: orderType, 
+          payment_method: paymentMethod, 
+          notes: buildNotes(),
+          reference_number: refNum,
+          delivery_address: orderType === 'Delivery' ? deliveryAddress : '',
+          delivery_fee: orderType === 'Delivery' ? (shop?.delivery_fee || 0) : 0
+        }),
       });
       const data = await res.json();
       if (data.success) { setRefCode(data.ref); setSent(true); }
@@ -142,7 +158,6 @@ export default function CustomerRequestPage() {
           Submit a request to <strong>{user?.shop_name}</strong> — staff will confirm and weigh your items.
         </p>
       </div>
-
       {/* Step 1: Order Type */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-card p-5 space-y-3">
         <div className="flex items-center gap-2">
@@ -153,22 +168,66 @@ export default function CustomerRequestPage() {
           {[
             { value: 'Pickup',   label: 'Walk-in / Pickup', icon: FiShoppingBag, desc: 'Bring to the shop' },
             { value: 'Delivery', label: 'Delivery',          icon: FiTruck,       desc: 'We pick up from you' },
-          ].map(({ value, label, icon: Icon, desc }) => (
-            <button key={value} onClick={() => setOrderType(value as any)}
-              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 text-center transition-all ${
-                orderType === value
-                  ? 'border-blue-600 bg-blue-50 text-blue-700'
-                  : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
-              }`}
-            >
-              <Icon size={22} />
-              <div>
-                <p className="font-bold text-sm">{label}</p>
-                <p className="text-xs opacity-70">{desc}</p>
-              </div>
-            </button>
-          ))}
+          ].map(({ value, label, icon: Icon, desc }) => {
+            const isAvailable = value === 'Pickup' || (shop?.delivery_available === true || shop?.delivery_available === 1);
+            
+            return (
+              <button 
+                key={value} 
+                disabled={!isAvailable}
+                onClick={() => setOrderType(value as any)}
+                className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 text-center transition-all ${
+                  !isAvailable 
+                    ? 'opacity-40 grayscale cursor-not-allowed border-slate-100 bg-slate-50'
+                    : orderType === value
+                      ? 'border-blue-600 bg-blue-50 text-blue-700'
+                      : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
+                }`}
+              >
+                <Icon size={22} />
+                <div>
+                  <p className="font-bold text-sm">{label}</p>
+                  <p className="text-xs opacity-70">{desc}</p>
+                  {!isAvailable && <p className="text-[10px] text-red-500 font-bold mt-1 uppercase">Unavailable</p>}
+                </div>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Delivery Unavailable Message */}
+        {shop?.delivery_available === false && (
+          <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-100 rounded-lg">
+            <span className="text-red-500 text-xs">⚠️</span>
+            <p className="text-[10px] text-red-600 font-semibold">Delivery services are temporarily unavailable at this shop.</p>
+          </div>
+        )}
+
+        {/* Delivery Address Input */}
+        {orderType === 'Delivery' && (
+          <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl space-y-2">
+              <label className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">
+                Delivery / Pickup Location
+              </label>
+              <div className="relative">
+                <FiTruck className="absolute left-3 top-3 text-blue-400" size={14} />
+                <textarea
+                  placeholder="Enter your complete address..."
+                  value={deliveryAddress}
+                  onChange={(e) => setDeliveryAddress(e.target.value)}
+                  rows={2}
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-blue-200 rounded-lg text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+                />
+              </div>
+              {shop?.delivery_fee > 0 && (
+                <p className="text-[10px] text-blue-500 font-semibold italic">
+                  Note: A delivery fee of ₱{parseFloat(shop.delivery_fee).toFixed(2)} will be added.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Step 2: Payment Method */}
@@ -195,6 +254,40 @@ export default function CustomerRequestPage() {
             </button>
           ))}
         </div>
+
+        {/* GCash Reference Input */}
+        {paymentMethod === 'GCash' && (
+          <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300 space-y-3">
+            {/* Shop GCash Details */}
+            <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-between gap-4">
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Send payment to:</p>
+                <p className="text-sm font-bold text-slate-800">{shop?.gcash_name || 'N/A'}</p>
+                <p className="text-xs font-medium text-emerald-700">{shop?.gcash_number || 'N/A'}</p>
+              </div>
+              <div className="p-3 bg-white rounded-xl border border-emerald-100 text-emerald-600 shadow-sm">
+                <FiSmartphone size={24} />
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl space-y-2">
+              <label className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
+                GCash Reference Number
+              </label>
+              <div className="relative">
+                <FiHash className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400" size={14} />
+                <input
+                  type="text"
+                  placeholder="Enter 13-digit ref number"
+                  value={refNum}
+                  onChange={(e) => setRefNum(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-emerald-200 rounded-lg text-sm font-medium text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                />
+              </div>
+              <p className="text-[10px] text-emerald-500 italic">Optional: Help us verify your payment faster.</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Step 3: Estimation Calculator */}

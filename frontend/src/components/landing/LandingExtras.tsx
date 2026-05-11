@@ -42,8 +42,8 @@ function FeatureMockup({ index }: { index: number }) {
   
   if (index === 0) { // Order Tracking
     return (
-      <div className="relative w-full h-full flex items-center justify-center">
-        <div className={`w-72 ${cardBg} rounded-2xl p-6 border ${borderColor} space-y-4 shadow-xl`}>
+      <div className="relative w-full h-full flex items-center justify-center p-4">
+        <div className={`w-full max-w-[280px] sm:w-72 ${cardBg} rounded-2xl p-6 border ${borderColor} space-y-4 shadow-xl`}>
           <div className="flex justify-between items-center mb-2">
             <span className={`text-[10px] font-black ${textColor} uppercase tracking-widest`}>Order #8821</span>
             <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[8px] font-bold">WASHING</span>
@@ -66,8 +66,8 @@ function FeatureMockup({ index }: { index: number }) {
 
   if (index === 1) { // Payments
     return (
-      <div className="relative w-full h-full flex items-center justify-center">
-        <div className={`w-64 ${cardBg} rounded-3xl p-8 border ${borderColor} flex flex-col items-center shadow-xl`}>
+      <div className="relative w-full h-full flex items-center justify-center p-4">
+        <div className={`w-full max-w-[260px] sm:w-64 ${cardBg} rounded-3xl p-8 border ${borderColor} flex flex-col items-center shadow-xl`}>
            <div className="w-16 h-16 rounded-2xl bg-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400 mb-6"><FiCreditCard size={32} /></div>
            <div className={`text-2xl font-black ${textColor} mb-1`}>₱1,250.00</div>
            <div className={`text-[10px] font-bold ${subTextColor} uppercase tracking-widest mb-6`}>Payment Due</div>
@@ -79,14 +79,14 @@ function FeatureMockup({ index }: { index: number }) {
 
   if (index === 2) { // Analytics
     return (
-      <div className="relative w-full h-full flex items-center justify-center gap-4">
+      <div className="relative w-full h-full flex items-center justify-center gap-2 sm:gap-4 p-4">
         {[1, 2, 3].map(i => (
-          <div key={i} className={`w-14 ${cardBg} border ${borderColor} rounded-xl flex flex-col-reverse p-1.5 overflow-hidden shadow-lg`} style={{ height: `${40 + i * 20}%` }}>
+          <div key={i} className={`w-10 sm:w-14 ${cardBg} border ${borderColor} rounded-xl flex flex-col-reverse p-1.5 overflow-hidden shadow-lg`} style={{ height: `${40 + i * 20}%` }}>
             <motion.div initial={{ height: 0 }} animate={{ height: '70%' }} transition={{ duration: 1, delay: i * 0.1 }} className="w-full bg-gradient-to-t from-cyan-500 to-blue-600 rounded-lg" />
           </div>
         ))}
-        <div className={`absolute top-12 right-12 p-5 rounded-2xl ${cardBg} border ${borderColor} shadow-2xl animate-float`}>
-          <FiTrendingUp className="text-cyan-600 dark:text-cyan-400" size={28} />
+        <div className={`absolute top-12 right-4 sm:right-12 p-3 sm:p-5 rounded-2xl ${cardBg} border ${borderColor} shadow-2xl animate-float`}>
+          <FiTrendingUp className="text-cyan-600 dark:text-cyan-400" size={24} />
         </div>
       </div>
     );
@@ -94,10 +94,10 @@ function FeatureMockup({ index }: { index: number }) {
 
   if (index === 3) { // Mobile
     return (
-      <div className="relative w-full h-full flex items-center justify-center">
-         <div className={`w-36 h-60 border-4 ${borderColor} rounded-[2.5rem] p-2 relative shadow-2xl`}>
-            <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-14 h-5 ${borderColor} border bg-white/10 rounded-b-xl`} />
-            <div className={`w-full h-full rounded-[2rem] ${cardBg} flex flex-col p-3 space-y-2.5`}>
+      <div className="relative w-full h-full flex items-center justify-center p-4">
+         <div className={`w-32 sm:w-36 h-56 sm:h-60 border-4 ${borderColor} rounded-[2rem] sm:rounded-[2.5rem] p-2 relative shadow-2xl`}>
+            <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-10 sm:w-14 h-4 sm:h-5 ${borderColor} border bg-white/10 rounded-b-xl`} />
+            <div className={`w-full h-full rounded-[1.5rem] sm:rounded-[2rem] ${cardBg} flex flex-col p-2 sm:p-3 space-y-2 sm:space-y-2.5`}>
                <div className="h-7 rounded-lg bg-cyan-500/20" />
                <div className={`h-14 rounded-lg ${cardBg} border ${borderColor}`} />
                <div className={`h-14 rounded-lg ${cardBg} border ${borderColor}`} />
@@ -210,7 +210,7 @@ export function DetailedFeaturesSection() {
         <h2 className="text-4xl lg:text-6xl font-black text-[#3B7597] mb-6 tracking-tight">Everything You Need</h2>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 relative min-h-[550px]">
+      <div className="max-w-7xl mx-auto px-6 relative min-h-[900px] sm:min-h-[800px] lg:min-h-[550px]">
         <AnimatePresence mode="wait">
           <motion.div
             key={index}
@@ -218,27 +218,29 @@ export function DetailedFeaturesSection() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.4, ease: "circOut" }}
-            className="absolute inset-0 flex flex-col lg:flex-row items-center gap-12 lg:gap-20 px-4"
+            className="absolute inset-0 flex flex-col lg:flex-row items-center justify-start lg:justify-center gap-8 lg:gap-20 px-2 sm:px-4"
           >
-            <div className="lg:w-1/2 flex flex-col items-start text-left">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6" 
+            <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left pt-4 sm:pt-0">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center mb-4 sm:mb-6" 
                    style={{ background: 'rgba(59, 117, 151, 0.1)', border: '1px solid rgba(59, 117, 151, 0.2)' }}>
-                {(() => { const Icon = features[index].icon; return <Icon size={32} className="text-cyan-600 dark:text-cyan-400" />; })()}
+                {(() => { const Icon = features[index].icon; return <Icon size={28} className="text-cyan-600 dark:text-cyan-400" />; })()}
               </div>
-              <h3 className="text-4xl lg:text-5xl font-black text-[#3B7597] mb-6 tracking-tight">{features[index].title}</h3>
-              <p className="text-[#3B7597] opacity-80 text-xl leading-relaxed mb-10 font-medium">{features[index].desc}</p>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+              <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#3B7597] mb-4 sm:mb-6 tracking-tight">{features[index].title}</h3>
+              <p className="text-[#3B7597] opacity-80 text-lg sm:text-xl leading-relaxed mb-6 sm:mb-10 font-medium">{features[index].desc}</p>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
                 {features[index].bullets.map((b, j) => (
-                  <li key={j} className="flex items-center gap-3 text-sm font-bold text-[#3B7597]/70">
-                    <FiCheckCircle size={18} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
+                  <li key={j} className="flex items-center gap-3 text-xs sm:text-sm font-bold text-[#3B7597]/70">
+                    <FiCheckCircle size={16} className="text-cyan-600 dark:text-cyan-400 shrink-0" />
                     {b}
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="lg:w-1/2 w-full h-[350px] lg:h-[450px] welaund-card overflow-hidden relative flex items-center justify-center bg-gradient-to-br from-[#3B7597]/5 to-transparent dark:from-white/5">
-               <FeatureMockup index={index} />
+            <div className="w-full lg:w-1/2 h-[300px] sm:h-[350px] lg:h-[450px] welaund-card overflow-hidden relative flex items-center justify-center bg-gradient-to-br from-[#3B7597]/5 to-transparent dark:from-white/5">
+               <div className="scale-90 sm:scale-100 w-full h-full flex items-center justify-center">
+                 <FeatureMockup index={index} />
+               </div>
             </div>
           </motion.div>
         </AnimatePresence>

@@ -6,32 +6,35 @@
 
 :root {
   --bg-color: #f8fafc;
-  --text-color: #3B7597; /* Primary Branding Color */
+  --text-color: hsl(202, 29%, 37%);
+  /* Primary Branding Color */
   --card-bg: rgba(241, 245, 249, 0.6);
   --card-border: rgba(255, 255, 255, 0.3);
   --glass-blur: 12px;
   --sky-gradient: radial-gradient(ellipse at 30% 60%, #5e95c2 0%, transparent 25%),
-                  radial-gradient(ellipse at 5% 50%, #749ac1 0%, transparent 20%),
-                  radial-gradient(ellipse at 35% 80%, #4081b3 0%, transparent 18%),
-                  radial-gradient(ellipse at 85% 100%, #7dadd2 0%, transparent 22%),
-                  radial-gradient(ellipse at 0% 75%, #5da2cd 0%, transparent 20%),
-                  linear-gradient(160deg, #e4f3ff 0%, #d5e8f9 8%, #d3e6f6 15%, #c7d7f0 22%, #aacfec 35%, #a6d2ef 42%, #bdd8ef 55%, #c8def5 65%, #c4dff3 75%, #c8ddf0 85%, #b4d7ed 100%);
+    radial-gradient(ellipse at 5% 50%, #749ac1 0%, transparent 20%),
+    radial-gradient(ellipse at 35% 80%, #4081b3 0%, transparent 18%),
+    radial-gradient(ellipse at 85% 100%, #7dadd2 0%, transparent 22%),
+    radial-gradient(ellipse at 0% 75%, #5da2cd 0%, transparent 20%),
+    linear-gradient(160deg, #e4f3ff 0%, #d5e8f9 8%, #d3e6f6 15%, #c7d7f0 22%, #aacfec 35%, #a6d2ef 42%, #bdd8ef 55%, #c8def5 65%, #c4dff3 75%, #c8ddf0 85%, #b4d7ed 100%);
 }
 
 .dark {
   --bg-color: #0a0f1e;
-  --text-color: #3B7597; /* Keeping it consistent as requested */
+  --text-color: #3B7597;
+  /* Keeping it consistent as requested */
   --card-bg: rgba(9, 60, 93, 0.4);
   --card-border: rgba(255, 255, 255, 0.10);
   --glass-blur: 16px;
-  --sky-gradient: radial-gradient(at 0% 0%, hsla(210,100%,15%,1) 0, transparent 50%), 
-                  radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                  radial-gradient(at 100% 0%, hsla(180,100%,10%,1) 0, transparent 50%), 
-                  radial-gradient(at 50% 100%, hsla(220,100%,10%,1) 0, transparent 50%), 
-                  radial-gradient(at 0% 100%, hsla(200,100%,15%,1) 0, transparent 50%);
+  --sky-gradient: radial-gradient(at 0% 0%, hsla(210, 100%, 15%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(180, 100%, 10%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 100%, hsla(220, 100%, 10%, 1) 0, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(200, 100%, 15%, 1) 0, transparent 50%);
 }
 
-html, body {
+html,
+body {
   min-height: 100vh;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -65,25 +68,48 @@ html, body {
 /* ── WeLaund Gradient Button ── */
 .welaund-btn {
   background: linear-gradient(90deg, #00aeef, #6366f1, #8e66ff);
-  color: white; /* Buttons usually keep white for legibility */
+  color: white;
+  /* Buttons usually keep white for legibility */
   border-radius: 0.75rem;
   font-weight: 800;
   transition: box-shadow 0.2s, transform 0.15s;
 }
+
 .welaund-btn:hover {
   box-shadow: 0 8px 32px rgba(99, 102, 241, 0.5);
   transform: scale(1.02);
 }
-.welaund-btn:active { transform: scale(0.98); }
+
+.welaund-btn:active {
+  transform: scale(0.98);
+}
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
 
-.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
-.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
 /* Sidebar nav link transitions */
 .nav-link {
@@ -99,10 +125,34 @@ html, body {
 tr.hoverable:hover td {
   @apply bg-slate-50;
 }
+
 .dark tr.hoverable:hover td {
   @apply bg-white/5;
 }
 
+/* Hide Number Spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 /* Animations */
-@keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-.wl-anim-slideup { animation: slideUp 0.7s ease both; }
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wl-anim-slideup {
+  animation: slideUp 0.7s ease both;
+}

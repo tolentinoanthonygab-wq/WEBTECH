@@ -7,7 +7,10 @@ const nextConfig = {
   swcMinify: true,
   reactStrictMode: false,
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://welaund-production.up.railway.app';
+    const isDev = process.env.NODE_ENV === 'development';
+    const backendUrl = isDev 
+      ? 'http://localhost/pWeB/WEBTECH/backend'
+      : (process.env.NEXT_PUBLIC_BACKEND_URL || 'https://welaund-production.up.railway.app');
     
     return [
       {

@@ -1,0 +1,6 @@
+# Ignore backend code for Vercel builds to speed up deployment
+backend/
+scratch/
+user_ui_ux.txt
+overview.txt
+railway.toml

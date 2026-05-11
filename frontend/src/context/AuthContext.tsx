@@ -76,7 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     setUser(null);
     localStorage.removeItem('welaund_session');
-    router.push('/login');
+    // Use hard redirect to completely clear state and prevent hook mismatch crashes during logout
+    window.location.href = '/login';
   };
 
   const updateUserInfo = (userData: AuthUser | null) => {

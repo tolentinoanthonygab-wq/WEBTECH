@@ -134,12 +134,19 @@ function LandingContent() {
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-4 bg-[var(--bg-color)]/80 backdrop-blur-xl border-b border-[var(--card-border)]' : 'py-8 bg-transparent'}`}>
         <div className="container mx-auto px-6 flex justify-between items-center">
           <Image src="/logo.png" alt="WeLaund" width={160} height={50} style={{ height: 'auto' }} className="w-32 lg:w-40" priority />
-          <div className="hidden lg:flex items-center gap-10">
-            {['Features', 'How It Works'].map(l => (
-              <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="text-sm font-bold text-[#3B7597] hover:opacity-100 transition-opacity tracking-wide uppercase">{l}</a>
-            ))}
+          
+          <div className="flex items-center gap-4 lg:gap-10">
+            <div className="hidden lg:flex items-center gap-10">
+              {['Features', 'How It Works'].map(l => (
+                <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="text-sm font-bold text-[#3B7597] hover:opacity-100 transition-opacity tracking-wide uppercase">{l}</a>
+              ))}
+            </div>
+            
             <ThemeToggle />
-            <button onClick={() => { setView('login'); document.getElementById('auth-card')?.scrollIntoView({ behavior: 'smooth' }); }} className="px-6 py-2.5 welaund-btn text-xs">Get Started</button>
+            
+            <button onClick={() => { setView('login'); document.getElementById('auth-card')?.scrollIntoView({ behavior: 'smooth' }); }} className="px-5 py-2 sm:px-6 sm:py-2.5 welaund-btn text-[10px] sm:text-xs">
+              Get Started
+            </button>
           </div>
         </div>
       </nav>

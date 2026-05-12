@@ -82,7 +82,7 @@ export default function CustomerRequestPage() {
 
   const handleSubmit = async () => {
     // validation
-    if (!services.some(s => s.weight > 0)) { 
+    if (!rows.some(r => r.serviceId && parseFloat(r.qty) > 0)) { 
       alert('Please add at least one service to your request.'); 
       return; 
     }

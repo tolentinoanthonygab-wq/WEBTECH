@@ -81,6 +81,24 @@ export default function CustomerRequestPage() {
       .join(' | ');
 
   const handleSubmit = async () => {
+    // validation
+    if (!services.some(s => s.weight > 0)) { 
+      alert('Please add at least one service to your request.'); 
+      return; 
+    }
+
+    if (paymentMethod === 'GCash') {
+      const cleanRef = refNum.trim();
+      if (!cleanRef) {
+        alert('Please enter your GCash Reference Number.');
+        return;
+      }
+      if (cleanRef.length !== 13 || !/^\d+$/.test(cleanRef)) {
+        alert('The GCash Reference Number must be exactly 13 digits.');
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch('/api/customer/request_order.php', {
@@ -281,11 +299,12 @@ export default function CustomerRequestPage() {
                   type="text"
                   placeholder="Enter 13-digit ref number"
                   value={refNum}
-                  onChange={(e) => setRefNum(e.target.value)}
+                  onChange={(e) => setRefNum(e.target.value.replace(/\D/g, ''))}
+                  maxLength={13}
                   className="w-full pl-9 pr-4 py-2 bg-white border border-emerald-200 rounded-lg text-sm font-medium text-emerald-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                 />
               </div>
-              <p className="text-[10px] text-emerald-500 italic">Optional: Help us verify your payment faster.</p>
+              <p className="text-[10px] text-rose-500 italic font-bold">Required: Must be exactly 13 digits to proceed.</p>
             </div>
           </div>
         )}

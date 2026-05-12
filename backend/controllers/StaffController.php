@@ -78,10 +78,13 @@ class StaffController
     public function getOrder(string $orderId): ?array
     {
         $stmt = $this->db->prepare(
-            "SELECT o.*, c.first_name, c.last_name, c.contact_number, c.address
+            "SELECT o.*, c.first_name, c.last_name, c.contact_number, c.address,
+                    p.transaction_reference as customer_reference, p.payment_method as customer_payment_method
              FROM orders o
              JOIN customers c ON c.id = o.customer_id
-             WHERE o.id = :id AND o.shop_id = :shop_id"
+             LEFT JOIN payments p ON p.order_id = o.id
+             WHERE o.id = :id AND o.shop_id = :shop_id
+             ORDER BY p.payment_date DESC LIMIT 1"
         );
         $stmt->execute([':id' => $orderId, ':shop_id' => $this->shopId]);
         $order = $stmt->fetch();

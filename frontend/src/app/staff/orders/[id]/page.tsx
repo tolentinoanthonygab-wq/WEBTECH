@@ -304,12 +304,26 @@ export default function OrderDetailPage() {
           {/* GCash Info */}
           <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 space-y-1">
             <div className="flex justify-between items-center mb-2">
-              <p className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">GCash Details</p>
+              <p className="text-[10px] font-bold text-blue-700 uppercase tracking-widest">Shop GCash Info</p>
               <span className="text-[9px] font-bold bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Official</span>
             </div>
             <p className="font-bold text-blue-900 text-sm">{order.gcash_name || 'Not configured'}</p>
             <p className="text-blue-700 font-mono text-sm">{order.gcash_number || '—'}</p>
           </div>
+
+          {/* Customer GCash Reference */}
+          {order.customer_reference && (
+            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 space-y-2 animate-pulse-subtle">
+              <div className="flex justify-between items-center">
+                <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Customer Reference</p>
+                <span className="text-[9px] font-bold bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full">Paid via GCash</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-black text-emerald-900 font-mono tracking-tighter">#{order.customer_reference}</span>
+              </div>
+              <p className="text-[10px] text-emerald-600 font-medium italic">Please verify this reference in your GCash App.</p>
+            </div>
+          )}
         </div>
       </div>
 

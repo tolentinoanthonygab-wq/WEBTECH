@@ -108,17 +108,21 @@ class CustomerController
     {
         $orderRef = 'REQ-' . strtoupper(substr(uniqid('', true), -6));
         
-        // 1. Create the Order
+        // 1. Create the Order (Including Notes and Payment Method)
         $stmt = $this->db->prepare(
-            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status)
-             VALUES (:ref, :cid, :sid, :type, 'Requested') RETURNING id"
+            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status, notes, payment_method, delivery_address, delivery_fee)
+             VALUES (:ref, :cid, :sid, :type, 'Requested', :notes, :pm, :daddr, :dfee) RETURNING id"
         );
         
         $stmt->execute([
             ':ref'   => $orderRef,
             ':cid'   => $this->customerId,
             ':sid'   => $shopId,
-            ':type'  => $type
+            ':type'  => $type,
+            ':notes' => $notes,
+            ':pm'    => $paymentMethod,
+            ':daddr' => $deliveryAddress,
+            ':dfee'  => $deliveryFee
         ]);
         
         $orderId = $stmt->fetchColumn();

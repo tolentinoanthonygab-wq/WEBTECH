@@ -101,9 +101,6 @@ class CustomerController
         string $type, 
         string $paymentMethod = '', 
         string $notes = '', 
-        string $refNum = '',
-        string $deliveryAddress = '',
-        float $deliveryFee = 0.0
     ): string
     {
         $orderRef = 'REQ-' . strtoupper(substr(uniqid('', true), -6));

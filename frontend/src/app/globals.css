@@ -6,7 +6,7 @@
 
 :root {
   --bg-color: #f8fafc;
-  --text-color: hsl(202, 29%, 37%);
+  --text-color: #1e293b;
   /* Primary Branding Color */
   --card-bg: rgba(241, 245, 249, 0.6);
   --card-border: rgba(255, 255, 255, 0.3);
@@ -46,8 +46,44 @@ body {
 /* ── WeLaund Dynamic Background ── */
 .welaund-bg {
   background: var(--sky-gradient);
+  background-size: 200% 200%;
   background-attachment: fixed;
+  animation: mesh-gradient 15s ease infinite alternate;
   transition: background 0.5s ease;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── Floating Glass Orbs ── */
+.welaund-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: 0;
+  opacity: 0.7;
+  pointer-events: none;
+  mix-blend-mode: plus-lighter;
+}
+
+.orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #00d2ff, transparent 80%);
+  top: -10%; left: -10%;
+  animation: orb-float 25s infinite alternate ease-in-out;
+}
+
+.orb-2 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, #4f46e5, transparent 80%);
+  bottom: -20%; right: -10%;
+  animation: orb-float 35s infinite alternate-reverse ease-in-out;
+}
+
+.orb-3 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #7c3aed, transparent 80%);
+  top: 40%; right: 20%;
+  animation: orb-float 30s infinite alternate ease-in-out;
 }
 
 /* ── WeLaund Glass Card ── */
@@ -155,4 +191,25 @@ input[type=number] {
 
 .wl-anim-slideup {
   animation: slideUp 0.7s ease both;
+}
+
+@keyframes orb-float {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(10%, 15%) scale(1.1); }
+  100% { transform: translate(-5%, 5%) scale(0.9); }
+}
+
+@keyframes mesh-gradient {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+.pulse-bg {
+    animation: pulse-bg 4s infinite alternate ease-in-out;
+}
+
+@keyframes pulse-bg {
+    0% { filter: brightness(100%) saturate(100%); }
+    100% { filter: brightness(115%) saturate(110%); }
 }

@@ -92,7 +92,8 @@ export default function CustomerRequestPage() {
           notes: buildNotes(),
           reference_number: refNum,
           delivery_address: orderType === 'Delivery' ? deliveryAddress : '',
-          delivery_fee: orderType === 'Delivery' ? (shop?.delivery_fee || 0) : 0
+          delivery_fee: orderType === 'Delivery' ? (shop?.delivery_fee || 0) : 0,
+          total_amount: grandTotal
         }),
       });
       const data = await res.json();

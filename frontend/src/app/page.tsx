@@ -29,7 +29,7 @@ function Field({ label, icon: Icon, children }: { label: string; icon: any; chil
   );
 }
 
-const inputCls = "w-full pb-2.5 pt-1 text-sm text-white placeholder-white/20 bg-transparent outline-none border-b border-white/10 focus:border-cyan-400 transition-colors duration-300";
+const inputCls = "w-full pb-2.5 pt-1 text-sm text-[var(--text-color)] placeholder-slate-400/50 bg-transparent outline-none border-b border-slate-300/30 focus:border-cyan-400 transition-colors duration-300";
 
 const STEPS = [
   { n: '01', title: 'Create Account',   desc: 'Register in seconds and link your laundry shop.' },
@@ -130,6 +130,11 @@ function LandingContent() {
 
   return (
     <div className="min-h-screen welaund-bg transition-colors duration-500">
+      {/* ── BACKGROUND ORBS ── */}
+      <div className="welaund-orb orb-1" />
+      <div className="welaund-orb orb-2" />
+      <div className="welaund-orb orb-3" />
+
       {/* ── NAVBAR ── */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-4 bg-[var(--bg-color)]/80 backdrop-blur-xl border-b border-[var(--card-border)]' : 'py-8 bg-transparent'}`}>
         <div className="container mx-auto px-6 flex justify-between items-center">
@@ -138,7 +143,7 @@ function LandingContent() {
           <div className="flex items-center gap-4 lg:gap-10">
             <div className="hidden lg:flex items-center gap-10">
               {['Features', 'How It Works'].map(l => (
-                <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="text-sm font-bold text-[#3B7597] hover:opacity-100 transition-opacity tracking-wide uppercase">{l}</a>
+                <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="text-sm font-bold text-[var(--text-color)] hover:opacity-100 transition-opacity tracking-wide uppercase">{l}</a>
               ))}
             </div>
             
@@ -157,10 +162,10 @@ function LandingContent() {
           <div className="flex flex-col lg:flex-row gap-20 items-center">
             <div className="lg:w-[55%] animate-slideup">
               <span className="inline-block px-4 py-1.5 rounded-full bg-cyan-400/10 border border-cyan-400/20 text-cyan-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8">Next-Gen Laundry Platform</span>
-              <h1 className="text-4xl sm:text-5xl lg:text-8xl font-black mb-8 leading-[0.95] tracking-tighter text-[#3B7597]">
-                Smart Laundry <br/><span className="text-[#3B7597]/70">Management.</span>
+              <h1 className="text-4xl sm:text-5xl lg:text-8xl font-black mb-8 leading-[0.95] tracking-tighter text-[var(--text-color)] drop-shadow-sm">
+                Smart Laundry <br/><span className="opacity-70">Management.</span>
               </h1>
-              <p className="text-xl text-[#3B7597]/80 max-w-lg mb-12 font-medium leading-relaxed">
+              <p className="text-xl text-[var(--text-color)]/80 max-w-lg mb-12 font-medium leading-relaxed">
                 Experience the first fully automated SaaS platform for laundry shop growth. Real-time orders, digital payments, and powerful analytics.
               </p>
               <div className="flex gap-4">
@@ -170,10 +175,10 @@ function LandingContent() {
             </div>
 
             <div className="lg:w-[45%] w-full max-w-md animate-slideup delay-200" id="auth-card">
-              <div className="welaund-card p-10 relative overflow-hidden">
+              <div className="welaund-card p-10 relative overflow-hidden pulse-bg">
                 <div className="flex gap-8 mb-10 border-b border-white/5 pb-2">
                   {['login', 'register'].map(v => (
-                    <button key={v} onClick={() => switchTo(v as any)} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${view === v ? 'text-[#3B7597]' : 'text-[#3B7597]/50 hover:text-[#3B7597]'}`}>
+                    <button key={v} onClick={() => switchTo(v as any)} className={`pb-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${view === v ? 'text-[var(--text-color)]' : 'text-[var(--text-color)]/50 hover:text-[var(--text-color)]'}`}>
                       {v}
                       {view === v && <div className="absolute bottom-0 left-0 right-0 h-1 bg-cyan-400 rounded-full" />}
                     </button>
@@ -242,17 +247,17 @@ function LandingContent() {
           <div className="container mx-auto px-6">
             <div className="text-center mb-16 lg:mb-24">
               <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-[0.4em] mb-4 block">Our Workflow</span>
-              <h2 className="text-4xl lg:text-5xl font-black text-[#3B7597] tracking-tight">How WeLaund Works</h2>
-              <p className="text-[#3B7597]/70 mt-4 font-medium text-base lg:text-lg">Four simple steps from drop-off to fresh pickup.</p>
+              <h2 className="text-4xl lg:text-5xl font-black text-[var(--text-color)] tracking-tight">How WeLaund Works</h2>
+              <p className="text-[var(--text-color)]/70 mt-4 font-medium text-base lg:text-lg">Four simple steps from drop-off to fresh pickup.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 text-center">
               {STEPS.map(({ n, title, desc }) => (
                 <div key={n} className="group animate-slideup">
-                  <div className="w-20 h-20 rounded-full mx-auto mb-8 flex items-center justify-center text-2xl font-black text-[#3B7597] bg-white/5 border border-white/5 group-hover:border-cyan-400/30 group-hover:bg-cyan-400/10 transition-all duration-500">
+                  <div className="w-20 h-20 rounded-full mx-auto mb-8 flex items-center justify-center text-2xl font-black text-[var(--text-color)] bg-white/5 border border-white/5 group-hover:border-cyan-400/30 group-hover:bg-cyan-400/10 transition-all duration-500">
                     {n}
                   </div>
-                  <h3 className="text-xl font-black text-[#3B7597] mb-3 tracking-tight">{title}</h3>
-                  <p className="text-[#3B7597]/70 text-sm font-medium leading-relaxed">{desc}</p>
+                  <h3 className="text-xl font-black text-[var(--text-color)] mb-3 tracking-tight">{title}</h3>
+                  <p className="text-[var(--text-color)]/70 text-sm font-medium leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
@@ -263,8 +268,8 @@ function LandingContent() {
         {/* ── CTA ── */}
         <section className="py-40 relative overflow-hidden">
           <div className="max-w-4xl mx-auto px-6 text-center welaund-card p-10 lg:p-20 border-cyan-400/20">
-            <h2 className="text-4xl lg:text-5xl font-black text-[#3B7597] mb-6 tracking-tight">Ready to Modernize?</h2>
-            <p className="text-[#3B7597]/70 mb-10 text-lg font-medium">Join hundreds of laundry shops already using WeLaund to scale.</p>
+            <h2 className="text-4xl lg:text-5xl font-black text-[var(--text-color)] mb-6 tracking-tight">Ready to Modernize?</h2>
+            <p className="text-[var(--text-color)]/70 mb-10 text-lg font-medium">Join hundreds of laundry shops already using WeLaund to scale.</p>
             <button className="px-12 py-5 welaund-btn text-base flex items-center gap-3 mx-auto">
               Get Started for Free <FiArrowRight />
             </button>
@@ -282,7 +287,7 @@ function LandingContent() {
                 </p>
               </div>
               <div className="space-y-6">
-                <h4 className="text-[#3B7597] font-black text-sm uppercase tracking-widest">Platform</h4>
+                <h4 className="text-[var(--text-color)] font-black text-sm uppercase tracking-widest">Platform</h4>
                 <div className="flex flex-col gap-4 text-slate-400 text-sm font-medium">
                   <a href="#features" className="hover:text-cyan-400 transition-colors">Features</a>
                   <a href="#how-it-works" className="hover:text-cyan-400 transition-colors">How It Works</a>
@@ -290,7 +295,7 @@ function LandingContent() {
                 </div>
               </div>
               <div className="space-y-6">
-                <h4 className="text-[#3B7597] font-black text-sm uppercase tracking-widest">Company</h4>
+                <h4 className="text-[var(--text-color)] font-black text-sm uppercase tracking-widest">Company</h4>
                 <div className="flex flex-col gap-4 text-slate-400 text-sm font-medium">
                   <a href="#" className="hover:text-cyan-400 transition-colors">Privacy Policy</a>
                   <a href="#" className="hover:text-cyan-400 transition-colors">Terms of Service</a>
@@ -325,7 +330,7 @@ function Modals({ showSuspended, setShowSuspended, showShopClosed, setShowShopCl
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="welaund-card w-full max-w-sm p-10 text-center space-y-6 border-rose-500/20">
             <div className="w-20 h-20 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto text-rose-500"><FiAlertOctagon size={40}/></div>
-            <div><h3 className="text-2xl font-black text-[#3B7597]">Account Suspended</h3><p className="text-[#3B7597]/70 text-sm mt-2 font-medium">Please contact support@welaund.com</p></div>
+            <div><h3 className="text-2xl font-black text-[var(--text-color)]">Account Suspended</h3><p className="text-[var(--text-color)]/70 text-sm mt-2 font-medium">Please contact support@welaund.com</p></div>
             <button onClick={() => setShowSuspended(false)} className="w-full py-4 bg-white/5 hover:bg-white/10 rounded-2xl font-black text-sm transition-all">Close</button>
           </div>
         </div>

@@ -1,6 +1,11 @@
 <?php
 declare(strict_types=1);
 
+// Ensure PHP errors never corrupt JSON output
+ini_set('display_errors', '0');
+error_reporting(0);
+header('Content-Type: application/json');
+
 require_once __DIR__ . '/../../config/Cors.php';
 Cors::handle(['GET', 'POST', 'OPTIONS']);
 

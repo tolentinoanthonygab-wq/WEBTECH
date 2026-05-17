@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
-
+ini_set('display_errors', '0');
+error_reporting(0);
+header('Content-Type: application/json');
 require_once __DIR__ . '/../../config/Cors.php';
-Cors::handle(['GET', 'POST', 'OPTIONS']);
 
 require_once __DIR__ . '/../../controllers/AuthController.php';
 require_once __DIR__ . '/../../controllers/CustomerController.php';

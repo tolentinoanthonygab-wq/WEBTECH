@@ -34,13 +34,44 @@ export default function CustomerProfilePage() {
     }
   }, [user]);
 
+  const compressImage = (file: File, maxSizeKB = 800): Promise<Blob> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const MAX = 1200;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
+          else { width = Math.round(width * MAX / height); height = MAX; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        let quality = 0.85;
+        const tryCompress = () => {
+          canvas.toBlob(blob => {
+            if (!blob) return reject(new Error('Compression failed'));
+            if (blob.size <= maxSizeKB * 1024 || quality <= 0.3) return resolve(blob);
+            quality -= 0.1;
+            tryCompress();
+          }, 'image/jpeg', quality);
+        };
+        tryCompress();
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const fd = new FormData();
-    fd.append('avatar', file);
     try {
+      const compressed = await compressImage(file);
+      const fd = new FormData();
+      fd.append('avatar', compressed, 'avatar.jpg');
       const res  = await fetch('/api/upload_avatar.php', { method: 'POST', body: fd });
       const data = await res.json();
       if (data.success) setPhotoUrl(data.photo_url + '&t=' + Date.now());

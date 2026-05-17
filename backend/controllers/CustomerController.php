@@ -50,7 +50,7 @@ class CustomerController
     public function getShop(): ?array
     {
         $stmt = $this->db->prepare(
-            "SELECT s.shop_name, s.address, s.contact_number, s.delivery_fee, s.delivery_available, s.gcash_name, s.gcash_number
+            "SELECT s.shop_name, s.address, s.contact_number, s.gcash_name, s.gcash_number
              FROM laundry_shops s
              JOIN customers c ON c.shop_id = s.id
              WHERE c.id = :cid LIMIT 1"
@@ -123,9 +123,9 @@ class CustomerController
     }
 
     public function createRequest(
-        string $shopId, 
-        string $type, 
-        string $paymentMethod = 'GCash', 
+        string $shopId,
+        string $type,
+        string $paymentMethod = 'GCash',
         string $notes = '',
         string $refNum = '',
         string $deliveryAddress = '',
@@ -133,38 +133,27 @@ class CustomerController
     ): string
     {
         $orderRef = 'REQ-' . strtoupper(substr(uniqid('', true), -6));
-        
-        // 1. Create the Order (Including Notes and Payment Method)
+
         $stmt = $this->db->prepare(
-            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status, notes, payment_method, delivery_address, delivery_fee)
-             VALUES (:ref, :cid, :sid, :type, 'Requested', :notes, :pm, :daddr, :dfee) RETURNING id"
+            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status)
+             VALUES (:ref, :cid, :sid, :type, 'Requested') RETURNING id"
         );
-        
         $stmt->execute([
-            ':ref'   => $orderRef,
-            ':cid'   => $this->customerId,
-            ':sid'   => $shopId,
-            ':type'  => $type,
-            ':notes' => $notes,
-            ':pm'    => $paymentMethod,
-            ':daddr' => $deliveryAddress,
-            ':dfee'  => $deliveryFee
+            ':ref'  => $orderRef,
+            ':cid'  => $this->customerId,
+            ':sid'  => $shopId,
+            ':type' => $type,
         ]);
-        
         $orderId = $stmt->fetchColumn();
 
-        // 2. If it's a GCash request with a reference number, create a payment record
         if ($paymentMethod === 'GCash' && !empty($refNum)) {
             $stmt = $this->db->prepare(
                 "INSERT INTO payments (order_id, amount_paid, payment_method, transaction_reference, status)
                  VALUES (:oid, 0, 'GCash', :rnum, 'Pending')"
             );
-            $stmt->execute([
-                ':oid'  => $orderId,
-                ':rnum' => $refNum
-            ]);
+            $stmt->execute([':oid' => $orderId, ':rnum' => $refNum]);
         }
-        
+
         return $orderRef;
     }
 }

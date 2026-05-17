@@ -18,7 +18,7 @@ class CustomerController
     public function getOrders(): array
     {
         $stmt = $this->db->prepare(
-            "SELECT o.id, o.order_ref, o.order_status, o.total_amount, o.created_on, o.payment_status,
+            "SELECT o.id, o.order_ref, o.order_status, o.total_amount, o.created_on, o.last_updated, o.payment_status,
                     s.shop_name, s.address as shop_address, s.contact_number as shop_contact
              FROM orders o
              JOIN laundry_shops s ON s.id = o.shop_id
@@ -129,20 +129,23 @@ class CustomerController
         string $notes = '',
         string $refNum = '',
         string $deliveryAddress = '',
-        float $deliveryFee = 0.0
+        float $deliveryFee = 0.0,
+        float $totalAmount = 0.0
     ): string
     {
         $orderRef = 'REQ-' . strtoupper(substr(uniqid('', true), -6));
 
         $stmt = $this->db->prepare(
-            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status)
-             VALUES (:ref, :cid, :sid, :type, 'Requested') RETURNING id"
+            "INSERT INTO orders (order_ref, customer_id, shop_id, pickup_delivery_type, order_status, notes, total_amount_estimated)
+             VALUES (:ref, :cid, :sid, :type, 'Requested', :notes, :total) RETURNING id"
         );
         $stmt->execute([
-            ':ref'  => $orderRef,
-            ':cid'  => $this->customerId,
-            ':sid'  => $shopId,
-            ':type' => $type,
+            ':ref'   => $orderRef,
+            ':cid'   => $this->customerId,
+            ':sid'   => $shopId,
+            ':type'  => $type,
+            ':notes' => $notes,
+            ':total' => $totalAmount,
         ]);
         $orderId = $stmt->fetchColumn();
 

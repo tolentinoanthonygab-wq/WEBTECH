@@ -33,9 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $refNum = $input['reference_number'] ?? '';
     $dAddr  = $input['delivery_address'] ?? '';
     $dFee   = (float)($input['delivery_fee'] ?? 0);
+    $total  = (float)($input['total_amount'] ?? 0);
 
     try {
-        $ref = $customer->createRequest($_SESSION['shop_id'], $type, $pm, $notes, $refNum, $dAddr, $dFee);
+        $ref = $customer->createRequest($_SESSION['shop_id'], $type, $pm, $notes, $refNum, $dAddr, $dFee, $total);
         echo json_encode(['success' => true, 'ref' => $ref, 'message' => 'Request sent!']);
     } catch (\Exception $e) {
         echo json_encode(['success' => false, 'message' => 'Failed to send request: ' . $e->getMessage()]);

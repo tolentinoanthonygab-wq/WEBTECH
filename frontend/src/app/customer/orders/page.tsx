@@ -75,8 +75,16 @@ export default function CustomerOrdersPage() {
                         {o.order_status.toUpperCase()}
                       </span>
                     </div>
-                    <p className="text-white/40 text-xs mt-0.5">
-                      {new Date(o.created_on).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    <p className="text-white/40 text-xs mt-0.5 flex items-center gap-2">
+                      <span>{new Date(o.created_on).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                      <span className="text-white/25">·</span>
+                      <span>{new Date(o.created_on).toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
+                      {o.order_status === 'Done' && o.last_updated && (
+                        <>
+                          <span className="text-white/25">·</span>
+                          <span className="text-emerald-400/70">Done {new Date(o.last_updated).toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', hour12: true })}</span>
+                        </>
+                      )}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="font-black text-white text-sm">₱{parseFloat(o.total_amount).toFixed(2)}</span>

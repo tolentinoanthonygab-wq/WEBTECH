@@ -159,7 +159,7 @@ class AuthController
         if (session_status() === PHP_SESSION_NONE) session_start();
         session_unset();
         session_destroy();
-        header('Location: /backend/public/index.php');
+        echo json_encode(['success' => true, 'message' => 'Logged out']);
         exit;
     }
 
@@ -167,7 +167,9 @@ class AuthController
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
         if (empty($_SESSION['logged_in']) || !in_array($_SESSION['role'] ?? '', $roles, true)) {
-            header('Location: /backend/public/index.php?error=unauthorized');
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
             exit;
         }
     }

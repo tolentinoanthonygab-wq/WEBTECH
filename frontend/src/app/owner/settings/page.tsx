@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRequireRole } from '@/context/AuthContext';
 import { FiSave, FiSettings, FiCreditCard, FiPhone, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import EmailChangeCard from '@/components/EmailChangeCard';
 
 export default function OwnerSettingsPage() {
   const { user, loading: authLoading } = useRequireRole('owner');

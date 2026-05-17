@@ -1,5 +1,8 @@
 <?php
 declare(strict_types=1);
+ini_set('display_errors', '0');
+error_reporting(0);
+header('Content-Type: application/json');
 
 require_once __DIR__ . '/../config/Cors.php';
 Cors::handle(['POST', 'OPTIONS']);
@@ -9,7 +12,6 @@ start_session();
 
 require_once __DIR__ . '/../config/Database.php';
 
-// Must be logged in
 if (empty($_SESSION['logged_in'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
@@ -30,47 +32,68 @@ if (empty($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
     exit;
 }
 
-$file     = $_FILES['avatar'];
-$maxSize  = 3 * 1024 * 1024; // 3 MB
-$allowed  = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+$file    = $_FILES['avatar'];
+$allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+$finfo   = new finfo(FILEINFO_MIME_TYPE);
+$mime    = $finfo->file($file['tmp_name']);
 
-// Validate size
-if ($file['size'] > $maxSize) {
-    echo json_encode(['success' => false, 'message' => 'File too large. Max 3MB.']);
-    exit;
-}
-
-// Validate MIME type using finfo (not just extension)
-$finfo    = new finfo(FILEINFO_MIME_TYPE);
-$mimeType = $finfo->file($file['tmp_name']);
-if (!in_array($mimeType, $allowed, true)) {
+if (!in_array($mime, $allowed, true)) {
     echo json_encode(['success' => false, 'message' => 'Invalid file type. Only JPG, PNG, WEBP, GIF allowed.']);
     exit;
 }
 
-$ext      = match($mimeType) {
-    'image/jpeg' => 'jpg',
-    'image/png'  => 'png',
-    'image/webp' => 'webp',
-    'image/gif'  => 'gif',
-    default      => 'jpg'
-};
+// ── Cloudinary credentials ──
+$cloudName = 'duirgj4eq';
+$apiKey    = '589946995928989';
+$apiSecret = 'rl69uXLa8YskcphM-JyBk9Cyjlg';
 
-$uploadDir = __DIR__ . '/../assets/img/avatars/';
-$filename  = $role . '_' . $userId . '.' . $ext;
-$destPath  = $uploadDir . $filename;
-
-// Remove old avatar files for this user (any extension)
-foreach (glob($uploadDir . $role . '_' . $userId . '.*') as $old) {
-    @unlink($old);
+// ── Build signed upload params ──
+$timestamp  = time();
+$publicId   = 'avatars/' . $role . '_' . $userId;
+$paramsToSign = [
+    'overwrite'   => 'true',
+    'public_id'   => $publicId,
+    'timestamp'   => $timestamp,
+    'transformation' => 'c_fill,w_400,h_400,q_auto',
+];
+ksort($paramsToSign);
+$signStr = '';
+foreach ($paramsToSign as $k => $v) {
+    $signStr .= $k . '=' . $v . '&';
 }
+$signStr  = rtrim($signStr, '&') . $apiSecret;
+$signature = sha1($signStr);
 
-if (!move_uploaded_file($file['tmp_name'], $destPath)) {
-    echo json_encode(['success' => false, 'message' => 'Failed to save file']);
+// ── POST to Cloudinary ──
+$postFields = [
+    'file'           => new CURLFile($file['tmp_name'], $mime, 'avatar'),
+    'api_key'        => $apiKey,
+    'timestamp'      => $timestamp,
+    'public_id'      => $publicId,
+    'overwrite'      => 'true',
+    'transformation' => 'c_fill,w_400,h_400,q_auto',
+    'signature'      => $signature,
+];
+
+$ch = curl_init("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+$result = json_decode($response, true);
+
+if ($httpCode !== 200 || empty($result['secure_url'])) {
+    error_log('[upload_avatar] Cloudinary error: ' . $response);
+    echo json_encode(['success' => false, 'message' => 'Cloudinary upload failed.']);
     exit;
 }
 
-// Save path to DB
+$photoUrl = $result['secure_url'];
+
+// ── Save URL to DB ──
 $db    = Database::getConnection();
 $table = match($role) {
     'customer' => 'customers',
@@ -78,13 +101,12 @@ $table = match($role) {
     'owner'    => 'owners',
     default    => 'customers'
 };
-$stmt  = $db->prepare("UPDATE {$table} SET profile_photo = :photo WHERE id = :id");
-$ok    = $stmt->execute([':photo' => $filename, ':id' => $userId]);
 
-$photoUrl = '/api/avatar.php?file=' . urlencode($filename);
+$stmt = $db->prepare("UPDATE {$table} SET profile_photo = :photo WHERE id = :id");
+$ok   = $stmt->execute([':photo' => $photoUrl, ':id' => $userId]);
 
 echo json_encode([
     'success'   => $ok,
     'message'   => $ok ? 'Avatar updated' : 'DB update failed',
-    'photo_url' => $photoUrl
+    'photo_url' => $photoUrl,
 ]);

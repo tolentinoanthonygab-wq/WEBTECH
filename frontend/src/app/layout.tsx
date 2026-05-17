@@ -4,8 +4,8 @@ import PageTransition from '@/components/PageTransition';
 import './globals.css';
 
 export const metadata = {
-  title: 'WeLaund — Smart Laundry Management',
-  description: 'WeLaund is a modern SaaS laundry management platform for shops and customers.',
+  title: 'WashWise — Smart Laundry Management',
+  description: 'WashWise is a modern SaaS laundry management platform for shops and customers.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -20,7 +20,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-default-200 flex flex-col">
         <div className="p-6 border-b border-default-200">
-          <Image src="/logo.png" alt="WeLaund" width={120} height={40} priority />
+          <Image src="/logo.png" alt="WashWise" width={120} height={40} priority />
           <p className="text-xs text-default-400 mt-2 truncate">{user?.shop_name}</p>
         </div>
 

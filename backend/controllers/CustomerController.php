@@ -33,11 +33,17 @@ class CustomerController
     public function getProfile(): ?array
     {
         $stmt = $this->db->prepare(
-            "SELECT id, first_name, middle_name, last_name, email, contact_number, address, status 
+            "SELECT id, first_name, middle_name, last_name, email, contact_number, address, status, profile_photo 
              FROM customers WHERE id = :cid"
         );
         $stmt->execute([':cid' => $this->customerId]);
-        return $stmt->fetch() ?: null;
+        $row = $stmt->fetch();
+        if ($row && $row['profile_photo']) {
+            $row['photo_url'] = '/api/avatar.php?file=' . urlencode($row['profile_photo']);
+        } else {
+            $row['photo_url'] = null;
+        }
+        return $row ?: null;
     }
 
     /** Get the shop this customer belongs to */
@@ -81,6 +87,26 @@ class CustomerController
             ':addr' => $data['address'] ?? '',
             ':cid'  => $this->customerId
         ]);
+    }
+
+    public function updateEmail(string $newEmail, string $currentPassword): array
+    {
+        // Verify password first
+        $stmt = $this->db->prepare("SELECT password_hash FROM customers WHERE id = :id");
+        $stmt->execute([':id' => $this->customerId]);
+        $hash = $stmt->fetchColumn();
+        if (!$hash || !password_verify($currentPassword, $hash))
+            return ['success' => false, 'message' => 'Incorrect password.'];
+
+        // Check email not already taken
+        $stmt = $this->db->prepare("SELECT id FROM customers WHERE email = :email AND id != :id");
+        $stmt->execute([':email' => strtolower(trim($newEmail)), ':id' => $this->customerId]);
+        if ($stmt->fetch())
+            return ['success' => false, 'message' => 'Email is already in use.'];
+
+        $stmt = $this->db->prepare("UPDATE customers SET email = :email, last_updated = NOW() WHERE id = :id");
+        $ok = $stmt->execute([':email' => strtolower(trim($newEmail)), ':id' => $this->customerId]);
+        return ['success' => $ok, 'message' => $ok ? 'Email updated.' : 'Failed to update email.'];
     }
 
     public function updatePassword(string $current, string $new): bool

@@ -56,9 +56,19 @@ export default function CustomerDashboard() {
 
       {/* Header */}
       <div className="flex flex-wrap justify-between items-center gap-3">
-        <div>
-          <h1 className="text-xl md:text-2xl font-black text-white">Hello, {user.first_name}! 👋</h1>
-          <p className="text-white/40 text-sm mt-0.5">Tracking your laundry at {user.shop_name}</p>
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white/20 shrink-0 bg-white/10">
+            {data?.profile?.photo_url
+              ? <img src={data.profile.photo_url} alt="avatar" className="w-full h-full object-cover" />
+              : <div className="w-full h-full flex items-center justify-center text-white/40 font-black text-sm">
+                  {user.first_name?.[0]?.toUpperCase()}
+                </div>
+            }
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-black text-white">Hello, {user.first_name}! 👋</h1>
+            <p className="text-white/40 text-sm mt-0.5">Tracking your laundry at {user.shop_name}</p>
+          </div>
         </div>
         <Link href="/customer/request">
           <button className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -163,10 +173,14 @@ export default function CustomerDashboard() {
                     <p className="font-bold text-sm text-white truncate">{order.order_ref}</p>
                     <p className="text-xs text-white/30 shrink-0">{new Date(order.created_on).toLocaleDateString()}</p>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <span className="text-[10px] font-black px-3 py-1 rounded-full"
                       style={{ background: order.order_status === 'Done' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', color: order.order_status === 'Done' ? '#10b981' : '#f87171' }}>
                       {order.order_status}
+                    </span>
+                    <span className="text-[10px] font-black px-3 py-1 rounded-full"
+                      style={{ background: order.payment_status === 'Paid' ? 'rgba(99,102,241,0.15)' : 'rgba(245,158,11,0.15)', color: order.payment_status === 'Paid' ? '#818cf8' : '#fbbf24' }}>
+                      {order.payment_status === 'Paid' ? 'PAID' : 'UNPAID'}
                     </span>
                     {order.order_status === 'Done' && (
                       <Link href={`/customer/receipt/${order.id}`}>

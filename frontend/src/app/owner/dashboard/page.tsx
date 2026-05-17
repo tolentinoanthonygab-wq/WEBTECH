@@ -26,6 +26,7 @@ export default function OwnerDashboard() {
   const { user, loading: authLoading } = useRequireRole('owner');
   const [data, setData]     = useState<OwnerStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   const now = new Date();
   const [calYear,  setCalYear]  = useState(now.getFullYear());
@@ -40,6 +41,10 @@ export default function OwnerDashboard() {
         .then(r => r.json())
         .then(res => { if (res.success) setData(res.data); setLoading(false); })
         .catch(() => setLoading(false));
+      fetch('/api/owner/profile.php')
+        .then(r => r.json())
+        .then(res => { if (res.success) setPhotoUrl(res.data?.photo_url || null); })
+        .catch(() => {});
     }
   }, [user]);
 
@@ -97,9 +102,19 @@ export default function OwnerDashboard() {
 
       {/* Header */}
       <div className="flex flex-wrap justify-between items-center gap-3">
-        <div>
-          <h1 className="text-xl md:text-2xl font-black text-white">Hello, {user.first_name}! 👋</h1>
-          <p className="text-white/40 text-sm mt-0.5">Business Dashboard — {user.shop_name}</p>
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white/20 shrink-0 bg-white/10">
+            {photoUrl
+              ? <img src={photoUrl} alt="avatar" className="w-full h-full object-cover" />
+              : <div className="w-full h-full flex items-center justify-center text-white/40 font-black text-sm">
+                  {user.first_name?.[0]?.toUpperCase()}
+                </div>
+            }
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-black text-white">Hello, {user.first_name}! 👋</h1>
+            <p className="text-white/40 text-sm mt-0.5">Business Dashboard — {user.shop_name}</p>
+          </div>
         </div>
         <Link href="/owner/settings">
           <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white/70 hover:text-white transition-all"

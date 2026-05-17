@@ -6,7 +6,7 @@
 
 :root {
   --bg-color: #f8fafc;
-  --text-color: #1e293b;
+  --text-color: #000000;
   /* Primary Branding Color */
   --card-bg: rgba(241, 245, 249, 0.6);
   --card-border: rgba(255, 255, 255, 0.3);
@@ -21,7 +21,7 @@
 
 .dark {
   --bg-color: #0a0f1e;
-  --text-color: #3B7597;
+  --text-color: #ffffff;
   /* Keeping it consistent as requested */
   --card-bg: rgba(9, 60, 93, 0.4);
   --card-border: rgba(255, 255, 255, 0.10);
@@ -221,4 +221,150 @@ input[type=number] {
 
 .animate-pulse-subtle {
   animation: pulse-subtle 3s infinite ease-in-out;
+}
+
+/* ── Phone SVG theme-aware classes ── */
+.phone-body {
+  fill: #1e3a5f;
+  stroke: rgba(255,255,255,0.2);
+}
+.phone-screen {
+  fill: #0f2040;
+}
+.phone-card {
+  fill: rgba(255,255,255,0.07);
+  stroke: rgba(255,255,255,0.1);
+}
+.phone-line-strong {
+  fill: rgba(255,255,255,0.45);
+}
+.phone-line-soft {
+  fill: rgba(255,255,255,0.18);
+}
+
+/* Light mode overrides */
+:root:not(.dark) .phone-body {
+  fill: #dbeafe;
+  stroke: rgba(99,179,237,0.4);
+}
+:root:not(.dark) .phone-screen {
+  fill: #eff6ff;
+}
+:root:not(.dark) .phone-card {
+  fill: rgba(255,255,255,0.7);
+  stroke: rgba(99,179,237,0.25);
+}
+:root:not(.dark) .phone-line-strong {
+  fill: rgba(30,58,138,0.5);
+}
+:root:not(.dark) .phone-line-soft {
+  fill: rgba(30,58,138,0.2);
+}
+
+/* ── Hero Section Specifics ── */
+.hero-phone-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    perspective: 1200px;
+    overflow: visible;
+}
+
+.hero-phone-img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 30px 60px rgba(0,0,0,0.2));
+    animation: float-phone 4s ease-in-out infinite;
+    z-index: 5;
+    position: relative;
+}
+
+.hero-shadow {
+    width: 320px;
+    height: 40px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 50%;
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    filter: blur(20px);
+    animation: shadow-pulse 4s ease-in-out infinite;
+    z-index: 1;
+}
+
+.dark .hero-shadow {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.hero-glass-card {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 18px 24px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: transform 0.3s ease;
+    min-width: 180px;
+}
+
+.hero-glass-card .font-bold {
+    color: #1e293b;
+}
+
+.hero-glass-card .opacity-60 {
+    color: #475569;
+    opacity: 1 !important;
+}
+
+.dark .hero-glass-card {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(99, 179, 237, 0.25);
+    box-shadow: 0 15px 45px rgba(0,0,0,0.5);
+}
+
+.dark .hero-glass-card .font-bold {
+    color: #e2e8f0 !important;
+}
+
+.dark .hero-glass-card .opacity-60 {
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+}
+
+.card-pos-1 { animation: float-card-1 5s ease-in-out infinite; }
+.card-pos-2 { animation: float-card-2 6s ease-in-out infinite; }
+.card-pos-3 { animation: float-card-3 7s ease-in-out infinite; }
+
+/* Animations */
+@keyframes float-phone {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-25px) rotate(1.5deg); }
+}
+
+@keyframes shadow-pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.6; }
+    50% { transform: translateX(-50%) scale(0.75); opacity: 0.3; }
+}
+
+@keyframes float-card-1 {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-20px) translateX(12px); }
+}
+
+@keyframes float-card-2 {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(20px) translateX(-12px); }
+}
+
+@keyframes float-card-3 {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-15px) translateX(18px); }
 }

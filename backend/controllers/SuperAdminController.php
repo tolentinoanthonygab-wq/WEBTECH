@@ -97,6 +97,38 @@ class SuperAdminController
     //  SUPER ADMINS  (manage other SA accounts)
     // ─────────────────────────────────────────────────────────
 
+    public function getSuperAdminProfile(string $id): ?array
+    {
+        $stmt = $this->db->prepare("SELECT id, username, email FROM super_admins WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch() ?: null;
+    }
+
+    public function updateSuperAdminEmail(string $id, string $newEmail, string $currentPassword): array
+    {
+        $stmt = $this->db->prepare("SELECT password_hash FROM super_admins WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        $hash = $stmt->fetchColumn();
+        if (!$hash || !password_verify($currentPassword, $hash))
+            return ['success' => false, 'message' => 'Incorrect password.'];
+        $stmt = $this->db->prepare("SELECT id FROM super_admins WHERE email = :email AND id != :id");
+        $stmt->execute([':email' => strtolower(trim($newEmail)), ':id' => $id]);
+        if ($stmt->fetch()) return ['success' => false, 'message' => 'Email already in use.'];
+        $stmt = $this->db->prepare("UPDATE super_admins SET email = :email WHERE id = :id");
+        $ok = $stmt->execute([':email' => strtolower(trim($newEmail)), ':id' => $id]);
+        return ['success' => $ok, 'message' => $ok ? 'Email updated.' : 'Failed to update email.'];
+    }
+
+    public function updateSuperAdminPassword(string $id, string $current, string $new): bool
+    {
+        $stmt = $this->db->prepare("SELECT password_hash FROM super_admins WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        $hash = $stmt->fetchColumn();
+        if (!$hash || !password_verify($current, $hash)) return false;
+        $stmt = $this->db->prepare("UPDATE super_admins SET password_hash = :hash WHERE id = :id");
+        return $stmt->execute([':hash' => password_hash($new, PASSWORD_BCRYPT), ':id' => $id]);
+    }
+
     public function getAllSuperAdmins(): array
     {
         return $this->db->query(

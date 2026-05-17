@@ -11,6 +11,7 @@ interface Customer {
   email: string;
   contact_number: string;
   status: 'Pending' | 'Approved' | 'Disapproved' | 'Inactive';
+  photo_url: string | null;
 }
 
 const CARD = {
@@ -67,16 +68,27 @@ export default function StaffCustomersPage() {
     const st = statusStyle[c.status] ?? statusStyle.Inactive;
     return (
       <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 last:border-0 gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-bold text-white text-sm">{c.first_name} {c.last_name}</p>
-            <span className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0"
-              style={{ background: st.bg, color: st.color }}>
-              {c.status.toUpperCase()}
-            </span>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10"
+            style={{ background: 'rgba(255,255,255,0.06)' }}>
+            {c.photo_url
+              ? <img src={c.photo_url} alt="avatar" className="w-full h-full object-cover" />
+              : <div className="w-full h-full flex items-center justify-center font-black text-sm text-white/40">
+                  {c.first_name?.[0]?.toUpperCase()}
+                </div>
+            }
           </div>
-          <p className="text-white/40 text-xs truncate mt-0.5">{c.email}</p>
-          <p className="text-white/30 text-xs">{c.contact_number || 'No contact'}</p>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="font-bold text-white text-sm">{c.first_name} {c.last_name}</p>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0"
+                style={{ background: st.bg, color: st.color }}>
+                {c.status.toUpperCase()}
+              </span>
+            </div>
+            <p className="text-white/40 text-xs truncate mt-0.5">{c.email}</p>
+            <p className="text-white/30 text-xs">{c.contact_number || 'No contact'}</p>
+          </div>
         </div>
 
         <div className="flex gap-2 shrink-0">

@@ -25,13 +25,19 @@ class OwnerController
     public function getAllStaff(): array
     {
         $stmt = $this->db->prepare(
-            'SELECT id, first_name, last_name, email, status, created_on
+            'SELECT id, first_name, last_name, email, status, created_on, profile_photo
              FROM staff
              WHERE shop_id = :shop_id
              ORDER BY created_on DESC'
         );
         $stmt->execute([':shop_id' => $this->shopId]);
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$row) {
+            $row['photo_url'] = $row['profile_photo']
+                ? '/api/avatar.php?file=' . urlencode($row['profile_photo'])
+                : null;
+        }
+        return $rows;
     }
 
     public function createStaff(string $fname, string $lname, string $email, string $password): bool
@@ -173,6 +179,46 @@ class OwnerController
     // ─────────────────────────────────────────────────────────
     //  SHOP SETTINGS
     // ─────────────────────────────────────────────────────────
+
+    public function getProfile(string $ownerId): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT id, first_name, last_name, email, profile_photo FROM owners WHERE id = :id'
+        );
+        $stmt->execute([':id' => $ownerId]);
+        $row = $stmt->fetch();
+        if ($row && $row['profile_photo']) {
+            $row['photo_url'] = '/api/avatar.php?file=' . urlencode($row['profile_photo']);
+        } else {
+            $row['photo_url'] = null;
+        }
+        return $row ?: null;
+    }
+
+    public function updateEmail(string $ownerId, string $newEmail, string $currentPassword): array
+    {
+        $stmt = $this->db->prepare("SELECT password_hash FROM owners WHERE id = :id");
+        $stmt->execute([':id' => $ownerId]);
+        $hash = $stmt->fetchColumn();
+        if (!$hash || !password_verify($currentPassword, $hash))
+            return ['success' => false, 'message' => 'Incorrect password.'];
+        $stmt = $this->db->prepare("SELECT id FROM owners WHERE email = :email AND id != :id");
+        $stmt->execute([':email' => strtolower(trim($newEmail)), ':id' => $ownerId]);
+        if ($stmt->fetch()) return ['success' => false, 'message' => 'Email already in use.'];
+        $stmt = $this->db->prepare("UPDATE owners SET email = :email WHERE id = :id");
+        $ok = $stmt->execute([':email' => strtolower(trim($newEmail)), ':id' => $ownerId]);
+        return ['success' => $ok, 'message' => $ok ? 'Email updated.' : 'Failed to update email.'];
+    }
+
+    public function updatePassword(string $ownerId, string $current, string $new): bool
+    {
+        $stmt = $this->db->prepare("SELECT password_hash FROM owners WHERE id = :id");
+        $stmt->execute([':id' => $ownerId]);
+        $hash = $stmt->fetchColumn();
+        if (!$hash || !password_verify($current, $hash)) return false;
+        $stmt = $this->db->prepare("UPDATE owners SET password_hash = :h WHERE id = :id");
+        return $stmt->execute([':h' => password_hash($new, PASSWORD_BCRYPT), ':id' => $ownerId]);
+    }
 
     public function getShop(): ?array
     {

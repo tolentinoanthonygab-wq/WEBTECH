@@ -34,7 +34,7 @@ export default function ReceiptPage() {
     <div className="p-8 max-w-2xl mx-auto">
       <Card className="shadow-2xl border-t-8 border-primary">
         <CardHeader className="flex flex-col items-center py-8">
-          <h1 className="text-3xl font-black text-primary italic">WeLaund</h1>
+          <h1 className="text-3xl font-black text-primary italic">WashWise</h1>
           <p className="text-default-500 text-sm font-bold tracking-widest uppercase mt-1">{user.shop_name}</p>
           <div className="mt-4 flex flex-col items-center">
             <h2 className="text-xl font-bold">OFFICIAL RECEIPT</h2>
@@ -90,7 +90,7 @@ export default function ReceiptPage() {
               {order.payment_status === 'Paid' ? <FiCheckCircle /> : <FiAlertCircle />}
               <span>{order.payment_status === 'Paid' ? 'Payment Verified' : 'Payment Pending'}</span>
             </div>
-            <p className="text-[10px] text-default-400">Thank you for choosing WeLaund!</p>
+            <p className="text-[10px] text-default-400">Thank you for choosing WashWise!</p>
           </div>
         </CardBody>
       </Card>

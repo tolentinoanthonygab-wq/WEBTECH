@@ -25,6 +25,7 @@ export default function StaffDashboard() {
   const { user, loading: authLoading } = useRequireRole('staff');
   const [data, setData] = useState<StaffStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -34,6 +35,10 @@ export default function StaffDashboard() {
           console.error('Failed to fetch staff stats:', error);
           setLoading(false);
         });
+      fetch('/api/staff/profile.php')
+        .then(r => r.json())
+        .then(res => { if (res.success) setPhotoUrl(res.data?.photo_url || null); })
+        .catch(() => {});
     }
   }, [user]);
 
@@ -50,9 +55,19 @@ export default function StaffDashboard() {
 
       {/* Header */}
       <div className="flex flex-wrap justify-between items-center gap-3">
-        <div>
-          <h1 className="text-xl md:text-2xl font-black text-white">Hello, {user.first_name}! 👋</h1>
-          <p className="text-white/40 text-sm mt-0.5">{user.shop_name} — Staff Dashboard</p>
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-white/20 shrink-0 bg-white/10">
+            {photoUrl
+              ? <img src={photoUrl} alt="avatar" className="w-full h-full object-cover" />
+              : <div className="w-full h-full flex items-center justify-center text-white/40 font-black text-sm">
+                  {user.first_name?.[0]?.toUpperCase()}
+                </div>
+            }
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-black text-white">Hello, {user.first_name}! 👋</h1>
+            <p className="text-white/40 text-sm mt-0.5">{user.shop_name} — Staff Dashboard</p>
+          </div>
         </div>
         <Link href="/staff/orders/new">
           <button className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"

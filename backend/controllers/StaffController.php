@@ -23,13 +23,19 @@ class StaffController
     public function getPendingCustomers(): array
     {
         $stmt = $this->db->prepare(
-            'SELECT id, first_name, last_name, email, contact_number, status, last_updated
+            'SELECT id, first_name, last_name, email, contact_number, status, last_updated, profile_photo
              FROM customers
              WHERE shop_id = :shop_id AND status = \'Pending\'
              ORDER BY last_updated ASC'
         );
         $stmt->execute([':shop_id' => $this->shopId]);
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$row) {
+            $row['photo_url'] = $row['profile_photo']
+                ? '/api/avatar.php?file=' . urlencode($row['profile_photo'])
+                : null;
+        }
+        return $rows;
     }
 
     public function updateCustomerStatus(string $customerId, string $newStatus): bool
@@ -213,9 +219,18 @@ class StaffController
 
     public function getApprovedCustomers(): array
     {
-        $stmt = $this->db->prepare("SELECT id, first_name, last_name, email, contact_number, status FROM customers WHERE shop_id = :sid AND status = 'Approved'");
+        $stmt = $this->db->prepare(
+            "SELECT id, first_name, last_name, email, contact_number, status, profile_photo
+             FROM customers WHERE shop_id = :sid AND status = 'Approved'"
+        );
         $stmt->execute([':sid' => $this->shopId]);
-        return $stmt->fetchAll();
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$row) {
+            $row['photo_url'] = $row['profile_photo']
+                ? '/api/avatar.php?file=' . urlencode($row['profile_photo'])
+                : null;
+        }
+        return $rows;
     }
 
     public function getDailyTotal(): float
@@ -297,6 +312,36 @@ class StaffController
     {
         $stmt = $this->db->prepare("UPDATE staff SET first_name = :fn, last_name = :ln WHERE id = :id");
         return $stmt->execute([':fn' => $fname, ':ln' => $lname, ':id' => $this->staffId]);
+    }
+
+    public function updateEmail(string $newEmail, string $currentPassword): array
+    {
+        $stmt = $this->db->prepare("SELECT password_hash FROM staff WHERE id = :id");
+        $stmt->execute([':id' => $this->staffId]);
+        $hash = $stmt->fetchColumn();
+        if (!$hash || !password_verify($currentPassword, $hash))
+            return ['success' => false, 'message' => 'Incorrect password.'];
+        $stmt = $this->db->prepare("SELECT id FROM staff WHERE email = :email AND id != :id");
+        $stmt->execute([':email' => strtolower(trim($newEmail)), ':id' => $this->staffId]);
+        if ($stmt->fetch()) return ['success' => false, 'message' => 'Email already in use.'];
+        $stmt = $this->db->prepare("UPDATE staff SET email = :email WHERE id = :id");
+        $ok = $stmt->execute([':email' => strtolower(trim($newEmail)), ':id' => $this->staffId]);
+        return ['success' => $ok, 'message' => $ok ? 'Email updated.' : 'Failed to update email.'];
+    }
+
+    public function getProfile(): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT id, first_name, last_name, email, profile_photo FROM staff WHERE id = :id"
+        );
+        $stmt->execute([':id' => $this->staffId]);
+        $row = $stmt->fetch();
+        if ($row && $row['profile_photo']) {
+            $row['photo_url'] = '/api/avatar.php?file=' . urlencode($row['profile_photo']);
+        } else {
+            $row['photo_url'] = null;
+        }
+        return $row ?: null;
     }
 
     public function updatePassword(string $current, string $new): bool

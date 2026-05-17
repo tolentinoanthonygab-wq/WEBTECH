@@ -84,7 +84,7 @@ export default function ShopsManagement() {
             </div>
             <div className="space-y-4">
               <p className="text-[10px] font-black text-cyan-400/70 uppercase tracking-widest">Shop Information</p>
-              {[['shop_name','Shop Name','e.g. WeLaund Makati'],['shop_address','Address','Street, City'],['shop_contact','Contact Number','09XX XXX XXXX']].map(([k,l,p])=>(
+              {[['shop_name','Shop Name','e.g. WashWise Makati'],['shop_address','Address','Street, City'],['shop_contact','Contact Number','09XX XXX XXXX']].map(([k,l,p])=>(
                 <div key={k} className="group">
                   <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 block">{l}</label>
                   <div className="relative"><input type="text" placeholder={p} value={(form as any)[k]} onChange={e=>setForm(f=>({...f,[k]:e.target.value}))} className={inputCls}/><div className="absolute bottom-0 left-0 h-px w-0 bg-gradient-to-r from-cyan-400 to-indigo-400 group-focus-within:w-full transition-all duration-500"/></div>

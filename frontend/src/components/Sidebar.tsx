@@ -2,7 +2,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FiHome, FiShoppingBag, FiUsers, FiUserCheck, FiBriefcase, FiLogOut, FiShield, FiDatabase } from 'react-icons/fi';
+import { FiHome, FiShoppingBag, FiUsers, FiUserCheck, FiBriefcase, FiLogOut, FiShield, FiDatabase, FiSettings } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 import MobileSidebarWrapper from './MobileSidebarWrapper';
 import ThemeToggle from './ThemeToggle';
@@ -16,6 +16,7 @@ const menuItems = [
   { name: 'Customers', path: '/super-admin/customers', icon: FiUserCheck },
   { name: 'Admins',    path: '/super-admin/admins',    icon: FiShield },
   { name: 'Database',  path: '/super-admin/database',  icon: FiDatabase },
+  { name: 'Settings',  path: '/super-admin/settings',  icon: FiSettings },
 ];
 
 export default function Sidebar() {
@@ -29,7 +30,7 @@ export default function Sidebar() {
         {/* Logo */}
         <div className="px-5 py-5 border-b border-white/10">
           <div className="bg-[#0a0f2e] rounded-xl px-4 py-2 inline-flex">
-            <Image src="/logo.png" alt="WeLaund" width={180} height={56} className="h-auto" style={{ width: 'auto' }} priority />
+            <Image src="/logo.png" alt="WashWise" width={180} height={56} className="h-auto" style={{ width: 'auto' }} priority />
           </div>
         </div>
 

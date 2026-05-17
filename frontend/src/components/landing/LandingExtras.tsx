@@ -271,7 +271,7 @@ export function BentoSection() {
         <div className="lg:col-span-8 welaund-card p-8 lg:p-12 relative overflow-hidden group">
           <div className="relative z-10">
             <h3 className="text-3xl lg:text-4xl font-black text-[#3B7597] mb-4 tracking-tight">Ready for Scale</h3>
-            <p className="text-[#3B7597] opacity-80 max-w-md font-medium text-lg">Whether you have one shop or a nationwide chain, WeLaund handles the complexity for you.</p>
+            <p className="text-[#3B7597] opacity-80 max-w-md font-medium text-lg">Whether you have one shop or a nationwide chain, WashWise handles the complexity for you.</p>
           </div>
           <div className="absolute right-0 bottom-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
             <FiTrendingUp size={300} className="text-[#3B7597]" />
@@ -299,7 +299,7 @@ export function WhySection() {
     <div className="py-32 bg-white/5 backdrop-blur-3xl border-y border-white/5">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16 lg:mb-24">
-          <h2 className="text-4xl lg:text-5xl font-black text-[#3B7597] tracking-tight">Why Choose WeLaund?</h2>
+          <h2 className="text-4xl lg:text-5xl font-black text-[#3B7597] tracking-tight">Why Choose WashWise?</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {benefits.map((b, i) => (

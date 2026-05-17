@@ -27,7 +27,7 @@ export default function StaffSidebar() {
         {/* Logo */}
         <div className="px-5 py-5 border-b border-white/10">
           <div className="bg-[#0a0f2e] rounded-xl px-4 py-2 inline-flex">
-            <Image src="/logo.png" alt="WeLaund" width={180} height={56} className="h-auto" style={{ width: 'auto' }} priority />
+            <Image src="/logo.png" alt="WashWise" width={180} height={56} className="h-auto" style={{ width: 'auto' }} priority />
           </div>
         </div>
 

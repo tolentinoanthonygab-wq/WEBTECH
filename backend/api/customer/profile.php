@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../config/Cors.php';
-Cors::handle(['GET', 'POST', 'PUT', 'OPTIONS']);
+Cors::handle(['GET', 'POST', 'PUT', 'PATCH', 'OPTIONS']);
 
 require_once __DIR__ . '/../../controllers/AuthController.php';
 require_once __DIR__ . '/../../controllers/CustomerController.php';
@@ -30,5 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $input = json_decode(file_get_contents('php://input'), true);
     $ok = $customer->updatePassword($input['current'] ?? '', $input['new'] ?? '');
     echo json_encode(['success' => $ok, 'message' => $ok ? 'Password changed' : 'Incorrect current password']);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
+    $input  = json_decode(file_get_contents('php://input'), true);
+    $result = $customer->updateEmail($input['new_email'] ?? '', $input['current_password'] ?? '');
+    echo json_encode($result);
     exit;
 }

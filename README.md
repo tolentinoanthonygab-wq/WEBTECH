@@ -1,4 +1,4 @@
-# 🧺 WeLaund — SaaS Laundry Management System
+# 🧺 WashWise — SaaS Laundry Management System
 
 A premium, modern SaaS-based Laundry Management System built with **Next.js (Frontend)**, **PHP (Backend)**, and **PostgreSQL (Database)**.
 

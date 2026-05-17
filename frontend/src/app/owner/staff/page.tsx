@@ -9,6 +9,7 @@ interface Staff {
   last_name: string;
   email: string;
   status: 'active' | 'inactive';
+  photo_url: string | null;
 }
 
 const CARD = {
@@ -104,18 +105,29 @@ export default function OwnerStaffPage() {
           <div className="divide-y divide-white/5">
             {staff.map(s => (
               <div key={s.id} className="flex items-center justify-between px-5 py-4 gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-bold text-white text-sm">{s.first_name} {s.last_name}</p>
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0"
-                      style={{
-                        background: s.status === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
-                        color: s.status === 'active' ? '#34d399' : '#f87171',
-                      }}>
-                      {s.status.toUpperCase()}
-                    </span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10"
+                    style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    {s.photo_url
+                      ? <img src={s.photo_url} alt="avatar" className="w-full h-full object-cover" />
+                      : <div className="w-full h-full flex items-center justify-center font-black text-sm text-white/40">
+                          {s.first_name?.[0]?.toUpperCase()}
+                        </div>
+                    }
                   </div>
-                  <p className="text-white/40 text-xs truncate mt-0.5">{s.email}</p>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-bold text-white text-sm">{s.first_name} {s.last_name}</p>
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full shrink-0"
+                        style={{
+                          background: s.status === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+                          color: s.status === 'active' ? '#34d399' : '#f87171',
+                        }}>
+                        {s.status.toUpperCase()}
+                      </span>
+                    </div>
+                    <p className="text-white/40 text-xs truncate mt-0.5">{s.email}</p>
+                  </div>
                 </div>
                 <button onClick={() => toggleStatus(s.id, s.status)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black shrink-0 transition-all hover:scale-105"
